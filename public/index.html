@@ -3,47 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Agency Portal | Premium AI Solutions</title>
+  <title>AI Agency Portal | Premium Automation Solutions</title>
   <style>
+    :root {
+      --primary: #f7722a;
+      --dark: #0f172a;
+      --light: #f8fafc;
+      --text: #334155;
+    }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f9fa1b;
-      color: #1f2937;
+      background-color: var(--light);
+      color: var(--text);
       line-height: 1.6;
     }
+    nav {
+      background-color: var(--dark);
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1e293b;
+    }
+    .logo {
+      color: white;
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: -0.5px;
+    }
+    .logo span {
+      color: var(--primary);
+    }
     header {
-      background-color: #1f2937;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       color: white;
       text-align: center;
-      padding: 60px 20px;
+      padding: 80px 20px;
     }
     header h1 {
       margin: 0;
-      font-size: 2.5rem;
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -1px;
     }
     header p {
-      font-size: 1.2rem;
-      color: #9ca3af;
-      margin-top: 10px;
+      font-size: 1.1rem;
+      color: #94a3b8;
+      max-width: 600px;
+      margin: 15px auto 0 auto;
     }
     .container {
       max-width: 800px;
-      margin: 40px auto;
+      margin: -40px auto 60px auto;
       padding: 0 20px;
     }
     .section {
       background: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      padding: 35px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
       margin-bottom: 30px;
     }
     h2 {
-      color: #1f2937;
-      border-bottom: 2px solid #f3f4f6;
-      padding-bottom: 10px;
+      color: var(--dark);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 25px;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 12px;
     }
     .services-grid {
       display: grid;
@@ -54,56 +84,79 @@
       .services-grid { grid-template-columns: 1fr 1fr; }
     }
     .service-card {
-      background: #f9fafb;
-      padding: 20px;
-      border-radius: 6px;
-      border-left: 4px solid #f7722a;
+      background: #f8fafc;
+      padding: 24px;
+      border-radius: 8px;
+      border-top: 4px solid var(--primary);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.02);
     }
-    .service-card h3 { margin-top: 0; }
-    .cta-area {
-      text-align: center;
-      padding: 40px 20px;
-    }
-    .btn-pay {
-      background-color: #f7722a;
-      color: white;
-      padding: 18px 36px;
-      text-decoration: none;
-      border-radius: 6px;
-      font-weight: bold;
+    .service-card h3 {
+      margin: 0 0 10px 0;
+      color: var(--dark);
       font-size: 1.2rem;
-      display: inline-block;
-      box-shadow: 0 4px 10px rgba(247, 114, 42, 0.3);
-      transition: transform 0.2s;
+    }
+    .service-card p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #64748b;
     }
     .faq-item {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    .faq-item:last-child {
+      margin-bottom: 0;
     }
     .faq-item strong {
       display: block;
-      color: #1f2937;
+      color: var(--dark);
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+    .faq-item p {
+      margin: 0;
+      color: #64748b;
+    }
+    .cta-area {
+      text-align: center;
+      padding: 40px 20px 20px 20px;
+    }
+    .btn-pay {
+      background-color: var(--primary);
+      color: white;
+      padding: 16px 32px;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: inline-block;
+      box-shadow: 0 10px 15px -3px rgba(247, 114, 42, 0.4);
+      transition: all 0.2s;
     }
   </style>
 </head>
 <body>
 
+  <nav>
+    <div class="logo">AI<span>Agency</span></div>
+  </nav>
+
   <header>
     <h1>AI Agency Portal</h1>
-    <p>Automating Businesses with Enterprise-Grade AI Solutions</p>
+    <p>Deploying cutting-edge corporate automation and autonomous agents to scale your operational workflow.</p>
   </header>
 
   <div class="container">
     <!-- Services Section -->
     <div class="section">
-      <h2>Our AI Services</h2>
+      <h2>Core Capabilities</h2>
       <div class="services-grid">
         <div class="service-card">
-          <h3>Custom AI Agents</h3>
-          <p>Automate your client support and operations with tailored smart assistants.</p>
+          <h3>Autonomous AI Agents</h3>
+          <p>Custom intelligent systems built to handle consumer support, lead generation, and operations around the clock.</p>
         </div>
         <div class="service-card">
-          <h3>Workflow Automation</h3>
-          <p>Connect your business tools together and let AI handle repetitive tasks.</p>
+          <h3>Systems Integration</h3>
+          <p>Seamlessly link your current database infrastructure and cloud applications together with modern AI pipelines.</p>
         </div>
       </div>
     </div>
@@ -112,19 +165,19 @@
     <div class="section">
       <h2>Frequently Asked Questions</h2>
       <div class="faq-item">
-        <strong>How quickly will my project launch?</strong>
-        <p>Most enterprise automations are deployed within 7 to 14 business days.</p>
+        <strong>What is the typical deployment timeline?</strong>
+        <p>Production-ready automations are fully built, tested, and shipped within 7 to 14 business days.</p>
       </div>
       <div class="faq-item">
-        <strong>Do you offer post-launch support?</strong>
-        <p>Yes, we provide round-the-clock monitoring and fine-tuning for all our AI integrations.</p>
+        <strong>Do you offer dedicated post-launch scaling?</strong>
+        <p>Yes, all active portals include comprehensive operational monitoring, data evaluation, and optimization tweaks.</p>
       </div>
     </div>
 
     <!-- Call to Action Section -->
     <div class="cta-area">
-      <h2>Ready to Scale Your Business?</h2>
-      <p style="margin-bottom: 25px; color: #4b5563;">Secure your development slot today by activating your portal access below.</p>
+      <h2 style="border: none; margin-bottom: 10px;">Secure Your Allocation Slot</h2>
+      <p style="margin-bottom: 30px; color: #64748b;">Activate your dedicated agency project setup immediately using our secure portal gateway.</p>
       <a href="https://flutterwave.com/pay/aqz0kdnuie6j" class="btn-pay">Get Started - Pay Now</a>
     </div>
   </div>

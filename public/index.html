@@ -3,20 +3,132 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Portal Test Page</title>
+  <title>AI Agency Portal | Premium AI Solutions</title>
   <style>
-    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f3f4f6; margin: 0; }
-    h1 { color: #1f2937; text-align: center; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9fa1b;
+      color: #1f2937;
+      line-height: 1.6;
+    }
+    header {
+      background-color: #1f2937;
+      color: white;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+    header p {
+      font-size: 1.2rem;
+      color: #9ca3af;
+      margin-top: 10px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    .section {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
+    h2 {
+      color: #1f2937;
+      border-bottom: 2px solid #f3f4f6;
+      padding-bottom: 10px;
+    }
+    .services-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 600px) {
+      .services-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .service-card {
+      background: #f9fafb;
+      padding: 20px;
+      border-radius: 6px;
+      border-left: 4px solid #f7722a;
+    }
+    .service-card h3 { margin-top: 0; }
+    .cta-area {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .btn-pay {
+      background-color: #f7722a;
+      color: white;
+      padding: 18px 36px;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      display: inline-block;
+      box-shadow: 0 4px 10px rgba(247, 114, 42, 0.3);
+      transition: transform 0.2s;
+    }
+    .faq-item {
+      margin-bottom: 15px;
+    }
+    .faq-item strong {
+      display: block;
+      color: #1f2937;
+    }
   </style>
 </head>
 <body>
-  <div>
-    <h1>AI Portal Test Page</h1>
-    <p style="text-align: center; color: #4b5563;">Look at the bottom right of your screen for the chat widget!</p>
+
+  <header>
+    <h1>AI Agency Portal</h1>
+    <p>Automating Businesses with Enterprise-Grade AI Solutions</p>
+  </header>
+
+  <div class="container">
+    <!-- Services Section -->
+    <div class="section">
+      <h2>Our AI Services</h2>
+      <div class="services-grid">
+        <div class="service-card">
+          <h3>Custom AI Agents</h3>
+          <p>Automate your client support and operations with tailored smart assistants.</p>
+        </div>
+        <div class="service-card">
+          <h3>Workflow Automation</h3>
+          <p>Connect your business tools together and let AI handle repetitive tasks.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <strong>How quickly will my project launch?</strong>
+        <p>Most enterprise automations are deployed within 7 to 14 business days.</p>
+      </div>
+      <div class="faq-item">
+        <strong>Do you offer post-launch support?</strong>
+        <p>Yes, we provide round-the-clock monitoring and fine-tuning for all our AI integrations.</p>
+      </div>
+    </div>
+
+    <!-- Call to Action Section -->
+    <div class="cta-area">
+      <h2>Ready to Scale Your Business?</h2>
+      <p style="margin-bottom: 25px; color: #4b5563;">Secure your development slot today by activating your portal access below.</p>
+      <a href="https://flutterwave.com/pay/aqz0kdnuie6j" class="btn-pay">Get Started - Pay Now</a>
+    </div>
   </div>
-<div style="text-align: center; margin-top: 20px;">
-  <a href="https://flutterwave.com/pay/aqz0kdnuie6j" style="background-color: #f7722a; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Get Started - Pay Now</a>
-</div>
+
   <script src="/widget.js" data-subdomain="dentist"></script>
 </body>
 </html>

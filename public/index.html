@@ -15,7 +15,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: var(--light);
+      background-color: #f3f4f6;
       color: var(--text);
       line-height: 1.6;
     }
@@ -82,6 +82,7 @@
     }
     @media (min-width: 600px) {
       .services-grid { grid-template-columns: 1fr 1fr; }
+      .sponsor-grid { grid-template-columns: 1fr 1fr 1fr; }
     }
     .service-card {
       background: #f8fafc;
@@ -116,6 +117,33 @@
       margin: 0;
       color: #64748b;
     }
+    .sponsor-section {
+      background: white;
+      padding: 35px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .sponsor-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .btn-sponsor {
+      padding: 14px 20px;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: inline-block;
+      transition: all 0.2s;
+      color: white;
+    }
+    .bmc { background-color: #FFDD00; color: #000000; }
+    .gh { background-color: #24292e; }
+    .patreon { background-color: #FF424D; }
     .cta-area {
       text-align: center;
       padding: 40px 20px 20px 20px;
@@ -171,6 +199,17 @@
       <div class="faq-item">
         <strong>Do you offer dedicated post-launch scaling?</strong>
         <p>Yes, all active portals include comprehensive operational monitoring, data evaluation, and optimization tweaks.</p>
+      </div>
+    </div>
+
+    <!-- Global Sponsorship Section -->
+    <div class="sponsor-section">
+      <h2 style="border: none; margin-bottom: 5px;">Support Our Global Vision</h2>
+      <p style="color: #64748b; margin-bottom: 20px;">Help us scale the AI Agency Portal globally. Sponsor our development on your preferred platform:</p>
+      <div class="sponsor-grid">
+        <a href="https://www.buymeacoffee.com/YOUR_USERNAME" target="_blank" class="btn-sponsor bmc">☕ Buy Me a Coffee</a>
+        <a href="https://github.com/sponsors/chimeremezewisdom1001-max" target="_blank" class="btn-sponsor gh">💖 GitHub Sponsors</a>
+        <a href="https://www.patreon.com/YOUR_USERNAME" target="_blank" class="btn-sponsor patreon">🧡 Patreon</a>
       </div>
     </div>
 

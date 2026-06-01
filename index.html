@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Utility Hub</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        
+        /* App Header & Wallet */
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; position: relative; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card.premium { border-left: 5px solid gold; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        button.unlocked { background: #42b72a; }
+        button.buy { background: #f5a623; }
+        .result { background: #f4f4f4; padding: 10px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 11px; max-height: 120px; overflow-y: auto; text-align: left; display: none; word-break: break-all; }
+        
+        /* Direct Sponsor Banner */
+        .sponsor-box { background: #fff9e6; border: 1px solid #ffe599; border-radius: 8px; padding: 10px; margin-bottom: 15px; font-size: 12px; text-align: left; }
+        .sponsor-box img { width: 100%; border-radius: 6px; margin-bottom: 5px; }
+
+        /* Ad Pop-up Modal */
+        #ad-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; }
+        .ad-box { background: #000; color: white; padding: 30px; border-radius: 12px; text-align: center; max-width: 300px; }
+        .timer { font-size: 28px; font-weight: bold; margin: 15px 0; color: #f5a623; }
+    </style>
+</head>
+<body>
+
+    <!-- App Header containing your user points and VIP status -->
+    <div class="header">
+        <h2 style="margin:0; color: var(--primary);">Social Hub</h2>
+        <div id="vip-status" style="font-size: 12px; color: #65676b; margin-top: 5px;">Basic Account</div>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Affiliate Space: Edit the link and image below if you sign up for Jumia/Amazon Affiliate later -->
+        <div class="sponsor-box">
+            <span style="font-weight: bold; color: #b7791f; font-size: 10px; display: block; margin-bottom: 5px;">SPONSORED DEAL</span>
+            <a href="https://your-affiliate-link-here.com" target="_blank" style="text-decoration: none; color: inherit;">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400" alt="Shoes">
+                <strong>Special Discount: Get 20% off Premium Sneakers</strong>
+                <p style="margin: 3px 0 0 0; color: #555;">Support our platform by checking out today's best deal.</p>
+            </a>
+        </div>
+
+        <!-- Wallet Top-up containing your live Flutterwave Link -->
+        <div class="card" style="border: 1px dashed var(--primary);">
+            <h3>🪙 Recharge Wallet</h3>
+            <p style="font-size: 13px; color: #65676b; margin-top: -10px;">Buy coins instantly or become a Lifetime VIP to skip all ads.</p>
+            
+            <button class="buy" onclick="window.open('https://flutterwave.com/pay/aqz0kdnuie6j', '_blank')">Buy Coins on Flutterwave</button>
+            <button class="buy" style="background: gold; color: #333; margin-top: 8px;" onclick="upgradeVIP()">Get Lifetime VIP Pass ($5)</button>
+        </div>
+
+        <!-- Tool 1: Free Feature -->
+        <div class="card">
+            <span style="color: blue; font-size: 11px; font-weight: bold;">FREE</span>
+            <h3>Random Advice Generator</h3>
+            <p>Access global daily tips instantly.</p>
+            <button onclick="runFeature('advice', 'https://api.adviceslip.com/advice')">Open Tool</button>
+            <div id="res-advice" class="result"></div>
+        </div>
+
+        <!-- Tool 2: Premium Feature (Costs 5 Coins) -->
+        <div class="card premium">
+            <span style="color: orange; font-size: 11px; font-weight: bold;">PREMIUM</span>
+            <h3>US Population Data</h3>
+            <p style="font-size: 13px; color: #65676b; margin-top: -10px;">Cost: <b>5 Coins</b> or <b>VIP Pass</b></p>
+            <button id="btn-pop" onclick="handleAccess('pop', 'https://datausa.io/api/data?drilldowns=Nation&measures=Population', 5)">Unlock Feature</button>
+            <button id="btn-ad-pop" style="background:#65676b; margin-top:8px;" onclick="watchAdForCoins()">Watch Video to Earn 5 Coins</button>
+            <div id="res-pop" class="result"></div>
+        </div>
+
+        <!-- Tool 3: Premium Feature (Costs 5 Coins) -->
+        <div class="card premium">
+            <span style="color: orange; font-size: 11px; font-weight: bold;">PREMIUM</span>
+            <h3>Bitcoin Asset Tracker</h3>
+            <p style="font-size: 13px; color: #65676b; margin-top: -10px;">Cost: <b>5 Coins</b> or <b>VIP Pass</b></p>
+            <button id="btn-crypto" onclick="handleAccess('crypto', 'https://api.coincap.io/v2/assets/bitcoin', 5)">Unlock Feature</button>
+            <button id="btn-ad-crypto" style="background:#65676b; margin-top:8px;" onclick="watchAdForCoins()">Watch Video to Earn 5 Coins</button>
+            <div id="res-crypto" class="result"></div>
+        </div>
+
+    </div>
+
+    <!-- Ad modal for earning coins -->
+    <div id="ad-modal">
+        <div class="ad-box">
+            <h3>Sponsor Video</h3>
+            <p style="font-size: 12px; color: #ccc;">Watch to completion to earn 5 free coins.</p>
+            <div class="timer" id="timer">10</div>
+        </div>
+    </div>
+
+    <script>
+        // Local database storage
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        let isVIP = localStorage.getItem('is_vip') === "true";
+
+        document.getElementById('coin-balance').innerText = coins;
+        if (isVIP) {
+            document.getElementById('vip-status').innerText = "👑 VIP Account (Ad-Free)";
+        }
+
+        // Redirects to your Flutterwave link for VIP purchase
+        function upgradeVIP() {
+            window.location.href = "https://flutterwave.com/pay/aqz0kdnuie6j";
+        }
+
+        // Ads monetization - Plays video to reward coins
+        function watchAdForCoins() {
+            const modal = document.getElementById("ad-modal");
+            const timerEl = document.getElementById("timer");
+            modal.style.display = "flex";
+            
+            let timeLeft = 10;
+            timerEl.innerText = timeLeft;
+
+            // --- PASTE YOUR ADSTERRA AD CODE SCRIPT RIGHT HERE LATER ---
+
+            const interval = setInterval(() => {
+                timeLeft--;
+                timerEl.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    modal.style.display = "none";
+                    
+                    // Add 5 coins to wallet
+                    coins += 5;
+                    localStorage.setItem('user_coins', coins);
+                    document.getElementById('coin-balance').innerText = coins;
+                    alert("Success! You have earned 5 coins.");
+                }
+            }, 1000);
+        }
+
+        // Handle accesses
+        function handleAccess(key, targetUrl, cost) {
+            if (isVIP) {
+                runFeature(key, targetUrl);
+                return;
+            }
+
+            if (coins >= cost) {
+                coins -= cost;
+                localStorage.setItem('user_coins', coins);
+                document.getElementById('coin-balance').innerText = coins;
+                runFeature(key, targetUrl);
+            } else {
+                alert("Insufficient Coins! Watch a sponsored video or top up your wallet to continue.");
+            }
+        }
+
+        // Connect directly to the providers
+        async function runFeature(key, targetUrl) {
+            const resultBox = document.getElementById(`res-${key}`);
+            resultBox.style.display = "block";
+            resultBox.innerText = "Loading data...";
+
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error("Connection failed");
+                const raw = await response.json();
+                const clean = JSON.parse(raw.contents);
+                resultBox.innerText = JSON.stringify(clean, null, 2);
+                
+                // Change button state to unlocked
+                const btn = document.getElementById(`btn-${key}`);
+                btn.innerText = "Run Tool";
+                btn.classList.add("unlocked");
+            } catch (err) {
+                resultBox.innerText = "Error loading data.";
+            }
+        }
+
+        // Flutterwave Auto-Upgrade Listener (Listens for successful redirection)
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentStatus = urlParams.get('status');
+
+            if (paymentStatus === 'successful' || paymentStatus === 'success') {
+                localStorage.setItem('is_vip', "true");
+                window.history.replaceState({}, document.title, window.location.pathname);
+                alert("🎉 Payment Successful! Your Lifetime VIP Pass is now Active. Enjoy an ad-free experience!");
+                location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+==================================================
+  LIVE PROJECT BLUEPRINT (SELF-UPDATING)
+==================================================
+Developer Name: Chimeremeze Wisdom
+GitHub Username: chimeremezewisdom1001-max
+Repository Name: ai-agency-portal
+Platform Name: Social & Utility Suite
+Active Domain: chimeremezewisdom1001-max.github.io
+
+--- CRITICAL INSTRUCTION FOR THE AI ---
+The live code of this application is always hosted at:
+https://chimeremezewisdom1001-max.github.io/ai-agency-portal/index.html
+
+You MUST fetch this URL, read the raw HTML/JS/CSS source code, and analyze it. This code is your ultimate source of truth. By reading it, you will automatically know:
+1. Every active API utility tool currently deployed (free and premium).
+2. The active Flutterwave payment link currently in use.
+3. The embedded Adsterra popunder script code.
+4. The active Amazon Associates affiliate links and product details.
+
+--- EXPECTED CLOUD DATABASE (Supabase) ---
+If the live code includes Supabase integration, it expects these tables:
+1. Table Name: "posts"
+   - Columns: id, created_at, author (text), content (text), media_url (text).
+   - RLS: Disabled for public access.
+2. Table Name: "messages"
+   - Columns: id, created_at, sender (text), text (text).
+   - RLS: Disabled for real-time global chat.
+
+Read the live code now, check the current configurations, and ask me how you can assist me with debugging, adding features, or making updates.

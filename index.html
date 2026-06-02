@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Utility Hub</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        button.buy { background: #f5a623; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 11px; max-height: 120px; overflow-y: auto; text-align: left; display: none; word-break: break-all; }
+        .sponsor-box { background: #fff9e6; border: 1px solid #ffe599; border-radius: 8px; padding: 10px; margin-bottom: 15px; font-size: 12px; text-align: left; }
+        .sponsor-box img { width: 100%; border-radius: 6px; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2 style="margin:0; color: var(--primary);">Social Hub</h2>
+        <div id="vip-status" style="font-size: 12px; color: #65676b; margin-top: 5px;">Basic Account</div>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Amazon Affiliate Banner -->
+        <div class="sponsor-box">
+            <span style="font-weight: bold; color: #b7791f; font-size: 10px; display: block; margin-bottom: 5px;">SPONSORED DEAL</span>
+            <a href="https://amzn.to/43FWWPL" target="_blank" style="text-decoration: none; color: inherit;">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400" alt="Laptop">
+                <strong>Sponsor Deal: Get the ASUS ROG Strix SCAR 18 Laptop</strong>
+                <p style="margin: 3px 0 0 0; color: #555;">Support our platform by checking out today's best deal on Amazon.</p>
+            </a>
+        </div>
+
+        <!-- Wallet Recharge (Flutterwave) -->
+        <div class="card" style="border: 1px dashed var(--primary);">
+            <h3>🪙 Recharge Wallet</h3>
+            <p style="font-size: 13px; color: #65676b; margin-top: -10px;">Buy coins instantly or become a Lifetime VIP to skip all ads.</p>
+            <button class="buy" onclick="window.open('https://flutterwave.com/pay/aqz0kdnuie6j', '_blank')">Buy Coins on Flutterwave</button>
+            <button class="buy" style="background: gold; color: #333; margin-top: 8px;" onclick="upgradeVIP()">Get Lifetime VIP Pass ($5)</button>
+        </div>
+
+        <!-- PAGE NAVIGATION (Crucial for multi-file setup) -->
+        <div class="card" style="background:#eaeaea;">
+            <h4 style="margin-top:0;">Navigate Suite</h4>
+            <button onclick="window.location.href='tools-math.html'" style="background: #28a745; margin-bottom: 8px;">📊 Math & Text Tools (11-20)</button>
+            <button onclick="window.location.href='tools-premium.html'" style="background: #f5a623;">👑 Premium AI & Tools (21-30)</button>
+        </div>
+
+        <h3 style="text-align:left;">Free Utility Suite (1-10)</h3>
+
+        <!-- Free Tools 1-5 -->
+        <div class="card">
+            <h3>Daily Advice Tips</h3>
+            <button onclick="runAdvice()">Get Random Advice</button>
+            <div id="res-advice" class="result"></div>
+        </div>
+
+        <div class="card">
+            <h3>Instant Joke Generator</h3>
+            <button onclick="runJoke()">Tell Me a Joke</button>
+            <div id="res-joke" class="result"></div>
+        </div>
+
+        <div class="card">
+            <h3>IP & Location Finder</h3>
+            <button onclick="runIPFinder()">Find My IP Info</button>
+            <div id="res-ip" class="result"></div>
+        </div>
+
+        <div class="card">
+            <h3>QR Code Generator</h3>
+            <input type="text" id="qr-text" placeholder="Type text or link here...">
+            <button onclick="runQRCode()">Generate QR Code</button>
+            <div id="res-qr" class="result" style="text-align: center;"></div>
+        </div>
+
+        <div class="card">
+            <h3>Age Predictor from Name</h3>
+            <input type="text" id="age-name" placeholder="Type a first name...">
+            <button onclick="runAgePredictor()">Predict My Age</button>
+            <div id="res-age" class="result"></div>
+        </div>
+
+        <!-- Free Tools 6-10 -->
+        <div class="card">
+            <h3>Body Mass Index (BMI)</h3>
+            <input type="number" id="bmi-weight" placeholder="Weight in kg (e.g. 70)">
+            <input type="number" id="bmi-height" placeholder="Height in cm (e.g. 175)">
+            <button onclick="runBMICalculator()">Calculate BMI</button>
+            <div id="res-bmi" class="result"></div>
+        </div>
+
+        <div class="card">
+            <h3>Restaurant Tip Calculator</h3>
+            <input type="number" id="tip-bill" placeholder="Bill Amount">
+            <input type="number" id="tip-pct" placeholder="Tip % (e.g. 10)">
+            <button onclick="runTipCalculator()">Calculate Tip</button>
+            <div id="res-tip" class="result"></div>
+        </div>
+
+        <div class="card">
+            <h3>Meters to Feet Converter</h3>
+            <input type="number" id="conv-meters" placeholder="Meters (e.g. 1.8)">
+            <button onclick="runUnitConverter()">Convert to Feet</button>
+            <div id="res-conv" class="result"></div>
+        </div>
+
+        <div class="card">
+            <h3>Digital Stopwatch</h3>
+            <div id="stopwatch-display" style="font-size:24px; font-weight:bold; margin-bottom:10px; text-align:center;">00:00:00</div>
+            <div style="display:flex; gap:5px;">
+                <button onclick="startStopwatch()" style="background:#28a745;">Start</button>
+                <button onclick="pauseStopwatch()" style="background:#f5a623;">Pause</button>
+                <button onclick="resetStopwatch()" style="background:#65676b;">Reset</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        let isVIP = localStorage.getItem('is_vip') === "true";
+        document.getElementById('coin-balance').innerText = coins;
+        if (isVIP) document.getElementById('vip-status').innerText = "👑 VIP Account (Ad-Free)";
+
+        function upgradeVIP() { window.location.href = "https://flutterwave.com/pay/aqz0kdnuie6j"; }
+
+        async function runAdvice() {
+            const b = document.getElementById('res-advice'); b.style.display = "block"; b.innerText = "Loading...";
+            try { const r = await fetch("https://api.adviceslip.com/advice"); const d = await r.json(); b.innerText = d.slip.advice; } catch(e) { b.innerText = "Error."; }
+        }
+        async function runJoke() {
+            const b = document.getElementById('res-joke'); b.style.display = "block"; b.innerText = "Loading...";
+            try { const r = await fetch("https://official-joke-api.appspot.com/random_joke"); const d = await r.json(); b.innerText = `${d.setup}\n\n👉 ${d.punchline}`; } catch(e) { b.innerText = "Error."; }
+        }
+        async function runIPFinder() {
+            const b = document.getElementById('res-ip'); b.style.display = "block"; b.innerText = "Loading...";
+            try { const r = await fetch("https://ipapi.co/json/"); const d = await r.json(); b.innerText = `IP: ${d.ip}\nCity: ${d.city}\nCountry: ${d.country_name}`; } catch(e) { b.innerText = "Error."; }
+        }
+        function runQRCode() {
+            const v = document.getElementById('qr-text').value; const b = document.getElementById('res-qr'); if(!v) return;
+            b.style.display = "block"; b.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(v)}" alt="QR"><br><p style="font-size:11px;">Hold image to download</p>`;
+        }
+        async function runAgePredictor() {
+            const v = document.getElementById('age-name').value; const b = document.getElementById('res-age'); if(!v) return;
+            b.style.display = "block"; b.innerText = "Analyzing...";
+            try { const r = await fetch(`https://api.agify.io/?name=${encodeURIComponent(v)}`); const d = await r.json(); b.innerText = `Name: ${d.name}\nAge: ${d.age} years`; } catch(e) { b.innerText = "Error."; }
+        }
+        function runBMICalculator() {
+            const w = parseFloat(document.getElementById('bmi-weight').value); const h = parseFloat(document.getElementById('bmi-height').value) / 100;
+            const b = document.getElementById('res-bmi'); if(!w || !h) return; b.style.display = "block";
+            const bmi = (w / (h * h)).toFixed(1); b.innerText = `Your BMI: ${bmi}`;
+        }
+        function runTipCalculator() {
+            const b = parseFloat(document.getElementById('tip-bill').value); const p = parseFloat(document.getElementById('tip-pct').value);
+            const box = document.getElementById('res-tip'); if(!b || !p) return; box.style.display = "block";
+            const tip = (b * (p / 100)).toFixed(2); box.innerText = `Tip Amount: ${tip}\nTotal: ${(b + parseFloat(tip)).toFixed(2)}`;
+        }
+        function runUnitConverter() {
+            const m = parseFloat(document.getElementById('conv-meters').value); const b = document.getElementById('res-conv'); if(!m) return;
+            b.style.display = "block"; b.innerText = `${m} Meters = ${(m * 3.28084).toFixed(2)} Feet`;
+        }
+
+        let timerInterval = null, elapsedMilliseconds = 0;
+        function startStopwatch() {
+            if (timerInterval) return; const start = Date.now() - elapsedMilliseconds;
+            timerInterval = setInterval(() => { elapsedMilliseconds = Date.now() - start; updateStopwatchDisplay(); }, 10);
+        }
+        function pauseStopwatch() { clearInterval(timerInterval); timerInterval = null; }
+        function resetStopwatch() { clearInterval(timerInterval); timerInterval = null; elapsedMilliseconds = 0; updateStopwatchDisplay(); }
+        function updateStopwatchDisplay() {
+            const s = Math.floor(elapsedMilliseconds / 1000); const m = Math.floor(s / 60); const sec = s % 60; const ms = Math.floor((elapsedMilliseconds % 1000) / 10);
+            document.getElementById('stopwatch-display').innerText = String(m).padStart(2,'0') + ":" + String(sec).padStart(2,'0') + ":" + String(ms).padStart(2,'0');
+        }
+
+        window.addEventListener('load', () => {
+            const params = new URLSearchParams(window.location.search); const status = params.get('status');
+            if (status === 'successful' || status === 'success') {
+                localStorage.setItem('is_vip', "true"); window.history.replaceState({}, document.title, window.location.pathname);
+                alert("🎉 VIP Pass Active!"); location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

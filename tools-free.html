@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Utilities - Part 2</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, select, textarea { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 11px; max-height: 120px; overflow-y: auto; text-align: left; display: none; word-break: break-all; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <h3 style="text-align:left;">Everyday Utilities (8-15)</h3>
+
+        <!-- Tool 8: Bill Splitter -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">FREE (8)</span>
+            <h3>Restaurant Bill & Tip Splitter</h3>
+            <input type="number" id="tip-bill" placeholder="Total Bill">
+            <input type="number" id="tip-pct" placeholder="Tip % (e.g. 10)">
+            <input type="number" id="tip-people" placeholder="Number of People">
+            <button onclick="runTipSplitter()">Calculate & Split</button>
+            <div id="res-tip" class="result"></div>
+        </div>
+
+        <!-- Tool 9: Age Calculator -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">FREE (9)</span>
+            <h3>Standard Age Calculator</h3>
+            <input type="date" id="age-dob">
+            <button onclick="runAgeCalc()">Calculate Age</button>
+            <div id="res-age" class="result"></div>
+        </div>
+
+        <!-- Tool 10: Date Interval -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">FREE (10)</span>
+            <h3>Date Interval Calculator</h3>
+            <input type="date" id="date-start">
+            <input type="date" id="date-end">
+            <button onclick="runIntervalCalc()">Calculate Days Between</button>
+            <div id="res-interval" class="result"></div>
+        </div>
+
+        <!-- Tool 11: Meters to Feet -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">FREE (11)</span>
+            <h3>Meters to Feet Converter</h3>
+            <input type="number" id="conv-m" placeholder="Meters">
+            <button onclick="runUnitConv()">Convert</button>
+            <div id="res-conv" class="result"></div>
+        </div>
+
+        <!-- Tool 12: Temperature -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">FREE (12)</span>
+            <h3>Temperature Converter</h3>
+            <input type="number" id="temp-val" placeholder="Temperature">
+            <select id="temp-type">
+                <option value="ctof">Celsius to Fahrenheit</option>
+                <option value="ftoc">Fahrenheit to Celsius</option>
+            </select>
+            <button onclick="runTempConv()">Convert</button>
+            <div id="res-temp" class="result"></div>
+        </div>
+
+        <!-- Tool 13: Percentage -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">FREE (13)</span>
+            <h3>Percentage Calculator</h3>
+            <input type="number" id="pct-p" placeholder="Part">
+            <input type="number" id="pct-w" placeholder="Whole">
+            <button onclick="runPctCalc()">Calculate %</button>
+            <div id="res-pct" class="result"></div>
+        </div>
+
+        <!-- Tool 14: Roman Numerals -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">FREE (14)</span>
+            <h3>Roman Numerals Converter</h3>
+            <input type="number" id="roman-num" placeholder="Number (1-3999)">
+            <button onclick="runRomanCalc()">Convert</button>
+            <div id="res-roman" class="result"></div>
+        </div>
+
+        <!-- Tool 15: Coin Flip -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">FREE (15)</span>
+            <h3>Heads or Tails Coin Flip</h3>
+            <button onclick="runCoinFlip()">Flip Coin</button>
+            <div id="res-flip" class="result" style="font-size:18px; font-weight:bold; text-align:center;"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        function runTipSplitter() {
+            const b = parseFloat(document.getElementById('tip-bill').value);
+            const p = parseFloat(document.getElementById('tip-pct').value);
+            const s = parseFloat(document.getElementById('tip-people').value) || 1;
+            const box = document.getElementById('res-tip'); if(!b || !p) return; box.style.display = "block";
+            const tip = b * (p / 100);
+            const total = b + tip;
+            box.innerText = `Total Tip: ₦${tip.toFixed(2)}\nTotal Bill: ₦${total.toFixed(2)}\nEach Person Pays: ₦${(total/s).toFixed(2)}`;
+        }
+        function runAgeCalc() {
+            const d = document.getElementById('age-dob').value;
+            const b = document.getElementById('res-age'); if(!d) return; b.style.display = "block";
+            const age = Math.abs(new Date(Date.now() - new Date(d).getTime()).getUTCFullYear() - 1970);
+            b.innerText = `You are ${age} years old.`;
+        }
+        function runIntervalCalc() {
+            const s = document.getElementById('date-start').value;
+            const e = document.getElementById('date-end').value;
+            const b = document.getElementById('res-interval'); if(!s || !e) return; b.style.display = "block";
+            const diffDays = Math.ceil(Math.abs(new Date(e).getTime() - new Date(s).getTime()) / (1000 * 60 * 60 * 24));
+            b.innerText = `Difference: ${diffDays.toLocaleString()} Days`;
+        }
+        function runUnitConv() {
+            const m = parseFloat(document.getElementById('conv-m').value);
+            const b = document.getElementById('res-conv'); if(!m) return; b.style.display = "block";
+            b.innerText = `${m} Meters = ${(m * 3.28084).toFixed(2)} Feet`;
+        }
+        function runTempConv() {
+            const v = parseFloat(document.getElementById('temp-val').value);
+            const t = document.getElementById('temp-type').value;
+            const b = document.getElementById('res-temp'); if(isNaN(v)) return; b.style.display = "block";
+            b.innerText = t === "ctof" ? `${v}°C = ${(v * 9/5 + 32).toFixed(1)}°F` : `${v}°F = ${((v - 32) * 5/9).toFixed(1)}°C`;
+        }
+        function runPctCalc() {
+            const p = parseFloat(document.getElementById('pct-p').value);
+            const w = parseFloat(document.getElementById('pct-w').value);
+            const b = document.getElementById('res-pct'); if(isNaN(p) || isNaN(w)) return; b.style.display = "block";
+            b.innerText = `${p} is ${((p / w) * 100).toFixed(2)}% of ${w}`;
+        }
+        function runRomanCalc() {
+            const n = parseInt(document.getElementById('roman-num').value);
+            const b = document.getElementById('res-roman'); if(!n || n < 1 || n > 3999) return; b.style.display = "block";
+            b.innerText = convertToRoman(n);
+        }
+        function convertToRoman(num) {
+            const roman = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1};
+            let str = ''; for (let i in roman) { while (num >= roman[i]) { str += i; num -= roman[i]; } } return str;
+        }
+        function runCoinFlip() {
+            const b = document.getElementById('res-flip'); b.style.display = "block";
+            b.innerText = Math.random() < 0.5 ? "🪙 HEADS" : "🪙 TAILS";
+        }
+    </script>
+</body>
+          </html>

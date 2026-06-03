@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math & Calculator Suite</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, select { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 11px; max-height: 120px; overflow-y: auto; text-align: left; display: none; word-break: break-all; }
+        
+        /* Calculator Grid */
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+        .calc-btn { background: #e4e6eb; color: black; padding: 12px; font-size: 18px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; width: 100%; }
+        .calc-btn.op { background: var(--primary); color: white; }
+        .calc-btn.eq { background: #28a745; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <h3 style="text-align:left;">Free Calculator Suite (1-15)</h3>
+
+        <!-- Tool 1: Pocket Calculator -->
+        <div class="card">
+            <h3>1. Pocket Calculator</h3>
+            <input type="text" id="calc-screen" readonly placeholder="0" style="text-align: right; font-size: 20px; font-weight: bold; width: 90%;">
+            <div class="calc-grid">
+                <button class="calc-btn" onclick="clearCalc()" style="background: red; color: white;">C</button>
+                <button class="calc-btn" onclick="pressCalcKey('/')">/</button>
+                <button class="calc-btn" onclick="pressCalcKey('*')">*</button>
+                <button class="calc-btn op" onclick="pressCalcKey('-')">-</button>
+                
+                <button class="calc-btn" onclick="pressCalcKey('7')">7</button>
+                <button class="calc-btn" onclick="pressCalcKey('8')">8</button>
+                <button class="calc-btn" onclick="pressCalcKey('9')">9</button>
+                <button class="calc-btn op" onclick="pressCalcKey('+')">+</button>
+                
+                <button class="calc-btn" onclick="pressCalcKey('4')">4</button>
+                <button class="calc-btn" onclick="pressCalcKey('5')">5</button>
+                <button class="calc-btn" onclick="pressCalcKey('6')">6</button>
+                <button class="calc-btn eq" onclick="solveCalc()" style="grid-row: span 2; height: 100%;">=</button>
+                
+                <button class="calc-btn" onclick="pressCalcKey('1')">1</button>
+                <button class="calc-btn" onclick="pressCalcKey('2')">2</button>
+                <button class="calc-btn" onclick="pressCalcKey('3')">3</button>
+                
+                <button class="calc-btn" onclick="pressCalcKey('0')" style="grid-column: span 2;">0</button>
+                <button class="calc-btn" onclick="pressCalcKey('.')">.</button>
+            </div>
+        </div>
+
+        <!-- Tool 2: Loan/Mortgage -->
+        <div class="card">
+            <h3>2. Loan & Mortgage Calculator</h3>
+            <input type="number" id="loan-amt" placeholder="Loan Amount">
+            <input type="number" id="loan-rate" placeholder="Annual Interest Rate %">
+            <input type="number" id="loan-months" placeholder="Duration (Months)">
+            <button onclick="runLoanCalc()">Calculate Monthly Payment</button>
+            <div id="res-loan" class="result"></div>
+        </div>
+
+        <!-- Tool 3: Savings Compound -->
+        <div class="card">
+            <h3>3. Savings Goal Planner</h3>
+            <input type="number" id="ci-p" placeholder="Initial Investment">
+            <input type="number" id="ci-r" placeholder="Annual Interest Rate %">
+            <input type="number" id="ci-t" placeholder="Years to Grow">
+            <button onclick="runSavingsCalc()">Calculate Growth</button>
+            <div id="res-savings" class="result"></div>
+        </div>
+
+        <!-- Tool 4: Salary Net Pay -->
+        <div class="card">
+            <h3>4. Net Salary Calculator</h3>
+            <input type="number" id="sal-gross" placeholder="Monthly Gross Salary">
+            <input type="number" id="sal-tax" placeholder="Tax Percentage %">
+            <button onclick="runSalaryCalc()">Calculate Net Take-Home</button>
+            <div id="res-salary" class="result"></div>
+        </div>
+
+        <!-- Tool 5: Discount & Sales Tax -->
+        <div class="card">
+            <h3>5. Discount & Sales Tax Calculator</h3>
+            <input type="number" id="disc-price" placeholder="Original Price">
+            <input type="number" id="disc-pct" placeholder="Discount %">
+            <input type="number" id="disc-tax" placeholder="Sales Tax %">
+            <button onclick="runDiscountCalc()">Calculate Final Price</button>
+            <div id="res-disc" class="result"></div>
+        </div>
+
+        <!-- Tool 6: BMI -->
+        <div class="card">
+            <h3>6. Body Mass Index (BMI)</h3>
+            <input type="number" id="bmi-w" placeholder="Weight in kg">
+            <input type="number" id="bmi-h" placeholder="Height in cm">
+            <button onclick="runBMICalc()">Calculate BMI</button>
+            <div id="res-bmi" class="result"></div>
+        </div>
+
+        <!-- Tool 7: Daily Calorie BMR -->
+        <div class="card">
+            <h3>7. Daily Calorie Intake (BMR)</h3>
+            <input type="number" id="bmr-w" placeholder="Weight in kg">
+            <input type="number" id="bmr-h" placeholder="Height in cm">
+            <input type="number" id="bmr-a" placeholder="Age in years">
+            <select id="bmr-g">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+            <button onclick="runBMRCalc()">Calculate BMR</button>
+            <div id="res-bmr" class="result"></div>
+        </div>
+
+        <!-- Tool 8: Age Calculator -->
+        <div class="card">
+            <h3>8. Age Calculator (Years/Days)</h3>
+            <input type="date" id="age-dob">
+            <button onclick="runAgeCalc()">Calculate Age</button>
+            <div id="res-age" class="result"></div>
+        </div>
+
+        <!-- Tool 9: Date Interval -->
+        <div class="card">
+            <h3>9. Date Interval Calculator</h3>
+            <input type="date" id="date-start">
+            <input type="date" id="date-end">
+            <button onclick="runIntervalCalc()">Calculate Days Between</button>
+            <div id="res-interval" class="result"></div>
+        </div>
+
+        <!-- Tool 10: Restaurant Tip Splitter -->
+        <div class="card">
+            <h3>10. Restaurant Tip Splitter</h3>
+            <input type="number" id="tip-bill" placeholder="Total Bill">
+            <input type="number" id="tip-pct" placeholder="Tip %">
+            <input type="number" id="tip-people" placeholder="Number of People">
+            <button onclick="runTipSplitter()">Calculate & Split</button>
+            <div id="res-tip" class="result"></div>
+        </div>
+
+        <!-- Tool 11: Meters to Feet -->
+        <div class="card">
+            <h3>11. Meters to Feet Converter</h3>
+            <input type="number" id="conv-m" placeholder="Meters">
+            <button onclick="runUnitConv()">Convert</button>
+            <div id="res-conv" class="result"></div>
+        </div>
+
+        <!-- Tool 12: Temperature -->
+        <div class="card">
+            <h3>12. Temperature Converter</h3>
+            <input type="number" id="temp-val" placeholder="Temperature">
+            <select id="temp-type">
+                <option value="ctof">Celsius to Fahrenheit</option>
+                <option value="ftoc">Fahrenheit to Celsius</option>
+            </select>
+            <button onclick="runTempConv()">Convert</button>
+            <div id="res-temp" class="result"></div>
+        </div>
+
+        <!-- Tool 13: Percentage -->
+        <div class="card">
+            <h3>13. Percentage Calculator</h3>
+            <input type="number" id="pct-p" placeholder="Part">
+            <input type="number" id="pct-w" placeholder="Whole">
+            <button onclick="runPctCalc()">Calculate %</button>
+            <div id="res-pct" class="result"></div>
+        </div>
+
+        <!-- Tool 14: Roman Numerals -->
+        <div class="card">
+            <h3>14. Roman Numerals Converter</h3>
+            <input type="number" id="roman-num" placeholder="Number (1-3999)">
+            <button onclick="runRomanCalc()">Convert</button>
+            <div id="res-roman" class="result"></div>
+        </div>
+
+        <!-- Tool 15: Coin Flip -->
+        <div class="card">
+            <h3>15. Coin Flip Simulator</h3>
+            <button onclick="runCoinFlip()">Flip Coin</button>
+            <div id="res-flip" class="result" style="font-size:18px; font-weight:bold; text-align:center;"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // Sync shared wallet
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        // Automatically load config to inject Adsterra dynamically
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script');
+                adScript.src = config.adsterra_script_url;
+                document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        // Pocket Calculator
+        const s = document.getElementById('calc-screen');
+        function pressCalcKey(k) { s.value === "0" || s.value === "Error" ? s.value = k : s.value += k; }
+        function clearCalc() { s.value = "0"; }
+        function solveCalc() {
+            const v = s.value;
+            if (/^[0-9+\-*/.]*$/.test(v)) {
+                try { s.value = Function(`"use strict"; return (${v})`)(); } catch(e) { s.value = "Error"; }
+            } else { s.value = "Error"; }
+        }
+
+        // Loan
+        function runLoanCalc() {
+            const p = parseFloat(document.getElementById('loan-amt').value);
+            const r = (parseFloat(document.getElementById('loan-rate').value) / 100) / 12;
+            const n = parseFloat(document.getElementById('loan-months').value);
+            const b = document.getElementById('res-loan'); if(!p || !r || !n) return; b.style.display = "block";
+            const monthly = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+            b.innerText = `Monthly Payment: ₦${monthly.toFixed(2).toLocaleString()}\nTotal Payment: ₦${(monthly * n).toFixed(2).toLocaleString()}`;
+        }
+
+        // Savings Compound Growth
+        function runSavingsCalc() {
+            const p = parseFloat(document.getElementById('ci-p').value);
+            const r = parseFloat(document.getElementById('ci-r').value) / 100;
+            const t = parseFloat(document.getElementById('ci-t').value);
+            const b = document.getElementById('res-savings'); if(!p || !r || !t) return; b.style.display = "block";
+            const val = p * Math.pow(1 + r, t);
+            b.innerText = `Total Growth: ₦${val.toFixed(2).toLocaleString()}\nInterest Earned: ₦${(val - p).toFixed(2).toLocaleString()}`;
+        }
+
+        // Salary Net Pay
+        function runSalaryCalc() {
+            const g = parseFloat(document.getElementById('sal-gross').value);
+            const t = parseFloat(document.getElementById('sal-tax').value) || 0;
+            const b = document.getElementById('res-salary'); if(!g) return; b.style.display = "block";
+            const tax = g * (t / 100);
+            b.innerText = `Gross Salary: ₦${g.toLocaleString()}\nTax Deduction (${t}%): ₦${tax.toLocaleString()}\nNet Pay: ₦${(g - tax).toLocaleString()}`;
+        }
+
+        // Discount & Sales Tax
+        function runDiscountCalc() {
+            const p = parseFloat(document.getElementById('disc-price').value);
+            const d = parseFloat(document.getElementById('disc-pct').value) || 0;
+            const t = parseFloat(document.getElementById('disc-tax').value) || 0;
+            const b = document.getElementById('res-disc'); if(!p) return; b.style.display = "block";
+            const discPrice = p * (1 - d/100);
+            const finalPrice = discPrice * (1 + t/100);
+            b.innerText = `Price after Discount: ₦${discPrice.toFixed(2)}\nFinal Price with Tax: ₦${finalPrice.toFixed(2)}`;
+        }
+
+        // BMI
+        function runBMICalc() {
+            const w = parseFloat(document.getElementById('bmi-w').value);
+            const h = parseFloat(document.getElementById('bmi-h').value) / 100;
+            const b = document.getElementById('res-bmi'); if(!w || !h) return; b.style.display = "block";
+            const bmi = (w / (h * h)).toFixed(1);
+            let cat = bmrCat(bmi);
+            b.innerText = `Your BMI: ${bmi}\nCategory: ${cat}`;
+        }
+        function bmrCat(b) {
+            if (b < 18.5) return "Underweight";
+            if (b >= 18.5 && b < 25) return "Normal Weight";
+            if (b >= 25 && b < 30) return "Overweight";
+            return "Obese";
+        }
+
+        // BMR
+        function runBMRCalc() {
+            const w = parseFloat(document.getElementById('bmr-w').value);
+            const h = parseFloat(document.getElementById('bmr-h').value);
+            const a = parseInt(document.getElementById('bmr-a').value);
+            const g = document.getElementById('bmr-g').value;
+            const b = document.getElementById('res-bmr'); if(!w || !h || !a) return; b.style.display = "block";
+            const bmr = g === "male" ? 88.362 + (13.397*w) + (4.799*h) - (5.677*a) : 447.593 + (9.247*w) + (3.098*h) - (4.330*a);
+            b.innerText = `BMR: ${bmr.toFixed(0)} Calories/day`;
+        }
+
+        // Age Calc
+        function runAgeCalc() {
+            const d = document.getElementById('age-dob').value;
+            const b = document.getElementById('res-age'); if(!d) return; b.style.display = "block";
+            const age = Math.abs(new Date(Date.now() - new Date(d).getTime()).getUTCFullYear() - 1970);
+            b.innerText = `You are ${age} years old.`;
+        }
+
+        // Date Interval
+        function runIntervalCalc() {
+            const s = document.getElementById('date-start').value;
+            const e = document.getElementById('date-end').value;
+            const b = document.getElementById('res-interval'); if(!s || !e) return; b.style.display = "block";
+            const diffDays = Math.ceil(Math.abs(new Date(e).getTime() - new Date(s).getTime()) / (1000 * 60 * 60 * 24));
+            b.innerText = `Difference: ${diffDays.toLocaleString()} Days`;
+        }
+
+        // Tip Splitter
+        function runTipSplitter() {
+            const b = parseFloat(document.getElementById('tip-bill').value);
+            const p = parseFloat(document.getElementById('tip-pct').value);
+            const s = parseFloat(document.getElementById('tip-people').value) || 1;
+            const box = document.getElementById('res-tip'); if(!b || !p) return; box.style.display = "block";
+            const tip = b * (p / 100);
+            const total = b + tip;
+            box.innerText = `Total Tip: ₦${tip.toFixed(2)}\nTotal Bill: ₦${total.toFixed(2)}\nEach Person Pays: ₦${(total/s).toFixed(2)}`;
+        }
+
+        // Meters to Feet
+        function runUnitConv() {
+            const m = parseFloat(document.getElementById('conv-m').value);
+            const b = document.getElementById('res-conv'); if(!m) return; b.style.display = "block";
+            b.innerText = `${m} Meters = ${(m * 3.28084).toFixed(2)} Feet`;
+        }
+
+        // Temp
+        function runTempConv() {
+            const v = parseFloat(document.getElementById('temp-val').value);
+            const t = document.getElementById('temp-type').value;
+            const b = document.getElementById('res-temp'); if(isNaN(v)) return; b.style.display = "block";
+            b.innerText = t === "ctof" ? `${v}°C = ${(v * 9/5 + 32).toFixed(1)}°F` : `${v}°F = ${((v - 32) * 5/9).toFixed(1)}°C`;
+        }
+
+        // Pct
+        function runPctCalc() {
+            const p = parseFloat(document.getElementById('pct-p').value);
+            const w = parseFloat(document.getElementById('pct-w').value);
+            const b = document.getElementById('res-pct'); if(isNaN(p) || isNaN(w)) return; b.style.display = "block";
+            b.innerText = `${p} is ${((p / w) * 100).toFixed(2)}% of ${w}`;
+        }
+
+        // Roman
+        function runRomanCalc() {
+            const n = parseInt(document.getElementById('roman-num').value);
+            const b = document.getElementById('res-roman'); if(!n || n < 1 || n > 3999) return; b.style.display = "block";
+            b.innerText = convertToRoman(n);
+        }
+        function convertToRoman(num) {
+            const roman = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1};
+            let str = ''; for (let i in roman) { while (num >= roman[i]) { str += i; num -= roman[i]; } } return str;
+        }
+
+        // Flip
+        function runCoinFlip() {
+            const b = document.getElementById('res-flip'); b.style.display = "block";
+            b.innerText = Math.random() < 0.5 ? "🪙 HEADS" : "🪙 TAILS";
+        }
+    </script>
+</body>
+      </html>

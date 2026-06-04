@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support & Donation Portal</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .address-box { background: #f4f4f4; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 11px; word-break: break-all; border: 1px solid #ddd; margin: 8px 0; -webkit-user-select: all; user-select: all; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <div class="card" style="border-left: 5px solid #f5a623;">
+            <h2>Support Our Platform</h2>
+            <p style="font-size: 13px; color: #65676b; margin-top: -10px;">
+                If you find our web utility suite helpful, consider supporting our development. Your donations help us maintain fast, ad-supported, data-friendly tools.
+            </p>
+        </div>
+
+        <!-- Flutterwave Donation Section -->
+        <div class="card">
+            <h3>💳 Donate via Card / Bank Transfer</h3>
+            <p style="font-size: 12px; color: #666; margin-top: -5px;">Securely complete your donation through our payment provider, Flutterwave.</p>
+            <button class="buy" style="background: #f5a623;">Donate via Flutterwave</button>
+        </div>
+
+        <!-- Crypto Donation Section -->
+        <div class="card">
+            <h3>🪙 Donate via Crypto (Bybit Wallet)</h3>
+            <p style="font-size: 12px; color: #666; margin-top: -5px;">Tap and hold any address below to copy it directly, then use your preferred wallet to complete your transfer.</p>
+            
+            <strong style="font-size: 13px; color: #0077b6;">USDT (Tron / TRC-20 Network):</strong>
+            <div class="address-box" id="usdt-addr">TVAa7k383pka9N2rqnZMch62ZQYG1Xx9Kt</div>
+            
+            <strong style="font-size: 13px; color: #f5a623;">Bitcoin (BTC Network):</strong>
+            <div class="address-box" id="btc-addr">17MNqQKgEFREFN3nA1RnsRvLswJxwEcAxW</div>
+            
+            <p style="font-size: 10px; color: #888; margin-top: 10px;">*Please ensure you send the correct asset to the corresponding blockchain network. Assets sent to the wrong network cannot be recovered.</p>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                
+                // Inject Adsterra ads dynamically
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+                
+                // Bind Flutterwave donation button link dynamically
+                const payButtons = document.querySelectorAll('.buy');
+                payButtons.forEach(button => {
+                    if (config.flutterwave_link) {
+                        button.onclick = () => {
+                            window.open(config.flutterwave_link, '_blank');
+                        };
+                    }
+                });
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+    </script>
+</body>
+  </html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Finance & Billing Suite</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, select { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 12px; text-align: left; display: none; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Tool 9: Company Valuation -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">FINANCE VALUE (9)</span>
+            <h3>Discounted Cash Flow (DCF) Valuation</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Determine your company's net present value by projecting 5-year cash flows.</p>
+            <input type="number" id="dcf-cf" placeholder="Year 1 Cash Flow (₦)">
+            <input type="number" id="dcf-growth" placeholder="Expected Annual Growth %">
+            <input type="number" id="dcf-wacc" placeholder="Discount Rate % (WACC) (e.g. 10)">
+            <button onclick="calculateValuation()" style="background:#28a745;">Calculate Valuation</button>
+            <div id="res-valuation" class="result"></div>
+        </div>
+
+        <!-- Tool 12: Cross Border Freelance -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">FINANCE VALUE (12)</span>
+            <h3>Freelance Invoice & Tax Optimizer</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Calculate the exact gross invoice amount needed to hit your net profit targets.</p>
+            <input type="number" id="freelance-net" placeholder="Target Net Payout (₦)">
+            <select id="freelance-platform">
+                <option value="0">Direct Billing (No platform fee)</option>
+                <option value="10">Upwork (10% standard cut)</option>
+                <option value="20">Fiverr (20% standard cut)</option>
+            </select>
+            <select id="freelance-processor">
+                <option value="0">Local Bank Transfer (Free)</option>
+                <option value="3.5">Stripe/PayPal Card (3.5% average fee)</option>
+            </select>
+            <button onclick="calculateInvoiceTarget()" style="background:#1877f2;">Calculate Gross Invoice</button>
+            <div id="res-freelance" class="result"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        function calculateValuation() {
+            const cf1 = parseFloat(document.getElementById('dcf-cf').value);
+            const g = parseFloat(document.getElementById('dcf-growth').value) / 100;
+            const wacc = parseFloat(document.getElementById('dcf-wacc').value) / 100;
+            const box = document.getElementById('res-valuation'); if (!cf1 || !g || !wacc) return;
+            box.style.display = "block";
+
+            // Project 5 years and calculate Present Value (PV)
+            let totalPV = 0;
+            let currentCF = cf1;
+            let projectionString = "--- 5-YEAR CASH PROJECTIONS ---\n";
+
+            for (let i = 1; i <= 5; i++) {
+                const pv = currentCF / Math.pow(1 + wacc, i);
+                totalPV += pv;
+                projectionString += `Year ${i} CF: ₦${Math.round(currentCF).toLocaleString()} (PV: ₦${Math.round(pv).toLocaleString()})\n`;
+                currentCF = currentCF * (1 + g);
+            }
+
+            // Estimate Terminal value using a conservative exit multiple (e.g. 8x Year 5 CF)
+            const terminalVal = currentCF * 8;
+            const terminalPV = terminalVal / Math.pow(1 + wacc, 5);
+            const enterpriseValue = totalPV + terminalPV;
+
+            box.innerText = `${projectionString}\nPresent Value of Flows: ₦${Math.round(totalPV).toLocaleString()}\nTerminal Value (Exit multiple): ₦${Math.round(terminalVal).toLocaleString()}\nEstimated Company Valuation: ₦${Math.round(enterpriseValue).toLocaleString()}`;
+        }
+
+        function calculateInvoiceTarget() {
+            const net = parseFloat(document.getElementById('freelance-net').value);
+            const platPct = parseFloat(document.getElementById('freelance-platform').value) / 100;
+            const procPct = parseFloat(document.getElementById('freelance-processor').value) / 100;
+            const box = document.getElementById('res-freelance'); if (!net) return;
+            box.style.display = "block";
+
+            // Gross = Net / ((1 - Platform) * (1 - Processor))
+            const invoiceTarget = net / ((1 - platPct) * (1 - procPct));
+            const platCut = invoiceTarget * platPct;
+            const procCut = (invoiceTarget - platCut) * procPct;
+
+            box.innerText = `Gross Invoice Target: ₦${Math.round(invoiceTarget).toLocaleString()}\n\nBreakdown:\n- Platform Deduction: ₦${Math.round(platCut).toLocaleString()}\n- Payment Processor Cut: ₦${Math.round(procCut).toLocaleString()}\n- Final Pocket Net: ₦${Math.round(net).toLocaleString()}`;
+        }
+    </script>
+</body>
+              </html>

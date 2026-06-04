@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup Growth & Runway Suite</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 12px; text-align: left; display: none; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Tool 7: Startup Runway -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">GROWTH TOOL (7)</span>
+            <h3>Burn Rate & Cash Flow Forecaster</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Calculate startup operational runway under Expected, Best-case, and Worst-case scenarios.</p>
+            <input type="number" id="run-capital" placeholder="Starting Bank Capital (₦)">
+            <input type="number" id="run-overhead" placeholder="Fixed Monthly Costs (₦)">
+            <input type="number" id="run-rev" placeholder="Variable Monthly Income (₦)">
+            <button onclick="calculateRunway()" style="background:#28a745;">Forecast Runway</button>
+            <div id="res-runway" class="result"></div>
+        </div>
+
+        <!-- Tool 8: Unit Economics -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">GROWTH TOOL (8)</span>
+            <h3>LTV:CAC Unit Economics Modeler</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Factor in ad spend, conversion frequency, and churn to check marketing profitability.</p>
+            <input type="number" id="cac-val" placeholder="Customer Acquisition Cost (CAC) (₦)">
+            <input type="number" id="ltv-aov" placeholder="Average Order Value (AOV) (₦)">
+            <input type="number" id="ltv-churn" placeholder="Monthly Customer Churn %">
+            <button onclick="calculateEconomics()" style="background:#1877f2;">Model Economics</button>
+            <div id="res-economics" class="result"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        function calculateRunway() {
+            const cap = parseFloat(document.getElementById('run-capital').value);
+            const cost = parseFloat(document.getElementById('run-overhead').value);
+            const rev = parseFloat(document.getElementById('run-rev').value) || 0;
+            const box = document.getElementById('res-runway'); if (!cap || !cost) return;
+            box.style.display = "block";
+
+            // Case calculations
+            const burnExp = cost - rev;
+            const runwayExp = burnExp > 0 ? (cap / burnExp).toFixed(1) : "Infinite (Profitable)";
+
+            const burnWorst = cost - (rev * 0.50);
+            const runwayWorst = burnWorst > 0 ? (cap / burnWorst).toFixed(1) : "Infinite (Profitable)";
+
+            const burnBest = cost - (rev * 1.50);
+            const runwayBest = burnBest > 0 ? (cap / burnBest).toFixed(1) : "Infinite (Profitable)";
+
+            box.innerText = `--- 12-MONTH RUNWAY OUTLOOK ---
+Expected Case: Runway is ${runwayExp} months (Burn: ₦${burnExp.toLocaleString()}/mo)
+Worst Case (-50% Rev): ${runwayWorst} months
+Best Case (+50% Rev): ${runwayBest} months`;
+        }
+
+        function calculateEconomics() {
+            const cac = parseFloat(document.getElementById('cac-val').value);
+            const aov = parseFloat(document.getElementById('ltv-aov').value);
+            const churn = parseFloat(document.getElementById('ltv-churn').value) / 100;
+            const box = document.getElementById('res-economics'); if (!cac || !aov || !churn) return;
+            box.style.display = "block";
+
+            // LTV = AOV / Churn Rate
+            const ltv = aov / churn;
+            const ratio = ltv / cac;
+
+            let verdict = "Highly Dangerous (Losing Money)";
+            if (ratio >= 3) verdict = "Excellent Scale Potential (Healthy Margins)";
+            else if (ratio >= 2) verdict = "Moderate Viability (Optimization Needed)";
+
+            box.innerText = `Customer Lifetime Value (LTV): ₦${ltv.toLocaleString()}\nLTV to CAC Ratio: ${ratio.toFixed(2)}x\n\nMarketing Assessment: ${verdict}`;
+        }
+    </script>
+</body>
+  </html>

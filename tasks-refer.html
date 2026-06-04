@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refer & Earn - Share Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .wallet-badge { background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        input { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .share-link-box { background: #f4f4f4; padding: 10px; border-radius: 6px; font-size: 12px; word-break: break-all; border: 1px solid #ddd; margin-bottom: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <div class="card" style="border-left: 5px solid #28a745;">
+            <h2>Refer & Earn Free Coins</h2>
+            <p style="font-size: 13px; color: #65676b; margin-top: -10px;">
+                Invite your friends to use our utility platform. You will receive **10 free coins** immediately for every friend who joins under your link.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Generate Your Referral Link</h3>
+            <p style="font-size: 12px; color: #666; margin-top: -5px;">Choose a nickname to generate your custom invite link:</p>
+            
+            <input type="text" id="ref-username" placeholder="Type your username...">
+            <button onclick="generateReferralLink()" style="background: #28a745; margin-bottom: 10px;">Generate Link</button>
+            
+            <div id="link-area" class="share-link-box"></div>
+            
+            <button id="whatsapp-btn" style="display:none; background:#25d366; margin-bottom: 8px;" onclick="shareToWhatsApp()">Share to WhatsApp</button>
+            <button id="copy-btn" style="display:none; background:#65676b;" onclick="copyLinkToClipboard()">Copy Link</button>
+        </div>
+
+        <div class="card" style="border: 1px dashed var(--primary);">
+            <h3>Check Your Referrals</h3>
+            <p style="font-size: 12px; color: #65676b; margin-top: -10px;">Check your database and claim any pending coins earned from friends who successfully joined.</p>
+            <button onclick="checkAndClaimReferrals()">Check & Claim Coins</button>
+        </div>
+
+    </div>
+
+    <script>
+        // Pre-configured to your real active database (zmniyeokodyckfsxinmc)
+        const SUPABASE_URL = "https://zmniyeokodyckfsxinmc.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptbml5ZW9rb2R5Y2tmc3hpbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNDQxOTYsImV4cCI6MjA5NTYyMDE5Nn0.DjDYDjXTJip6yWrNJAkINopQu6KZ2W9zFgwvIbMZQb4";
+
+        let supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        let generatedLink = "";
+        let usernameKey = "";
+
+        function generateReferralLink() {
+            usernameKey = document.getElementById('ref-username').value.trim().toLowerCase();
+            if (!usernameKey) { alert("Please type a username first!"); return; }
+            generatedLink = `https://chimeremezewisdom1001-max.github.io/ai-agency-portal/index.html?ref=${usernameKey}`;
+            const linkArea = document.getElementById('link-area');
+            linkArea.style.display = "block"; linkArea.innerText = generatedLink;
+            document.getElementById('whatsapp-btn').style.display = "block";
+            document.getElementById('copy-btn').style.display = "block";
+        }
+
+        function shareToWhatsApp() {
+            if (!generatedLink) return;
+            const message = `Check out this free 30-in-1 Web Utility Suite! It has calculators, health logs, and workout timers running completely in your browser without taking up any phone storage: ${generatedLink}`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        function copyLinkToClipboard() {
+            if (!generatedLink) return; navigator.clipboard.writeText(generatedLink); alert("Referral Link copied!");
+        }
+
+        async function checkAndClaimReferrals() {
+            const currentNickname = document.getElementById('ref-username').value.trim().toLowerCase();
+            if (!currentNickname) { alert("Please type your generated username first!"); return; }
+
+            const { data, error, count } = await supabase
+                .from('referrals').select('*', { count: 'exact' }).eq('referrer_username', currentNickname);
+
+            if (error) { alert("Database connection error."); return; }
+
+            let claimedCount = parseInt(localStorage.getItem(`claimed_ref_count_${currentNickname}`)) || 0;
+            let unclaimedCount = count - claimedCount;
+
+            if (unclaimedCount > 0) {
+                const totalReward = unclaimedCount * 10;
+                coins += totalReward;
+                localStorage.setItem('user_coins', coins);
+                localStorage.setItem(`claimed_ref_count_${currentNickname}`, count);
+                document.getElementById('coin-balance').innerText = coins;
+                alert(`🎉 Success! Found ${unclaimedCount} new referral(s). You earned ${totalReward} free coins!`);
+            } else { alert("No new referrals found yet. Share your link on WhatsApp status to get friends to join!"); }
+        }
+    </script>
+</body>
+</html>

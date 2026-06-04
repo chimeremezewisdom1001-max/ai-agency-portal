@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Subscription & ARR Growth Simulator</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 11px; text-align: left; display: none; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Tool 11: SaaS Simulator -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">SaaS METRICS (11)</span>
+            <h3>Subscription Revenue & ARR Matrix</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Simulate compounding growth metrics, expansion revenue, and ARR curves over a 5-year timeline.</p>
+            <input type="number" id="saas-mrr" placeholder="Starting Monthly Revenue (MRR) (₦)">
+            <input type="number" id="saas-arpu" placeholder="Average Revenue Per User (ARPU) (₦)">
+            <input type="number" id="saas-growth" placeholder="Monthly New Customers">
+            <input type="number" id="saas-churn" placeholder="Monthly Logo Churn %">
+            <input type="number" id="saas-expansion" placeholder="Monthly Expansion Rev % (e.g. 2)">
+            <button onclick="simulateSaaSARR()" style="background:#28a745;">Run Simulation</button>
+            <div id="res-saas" class="result"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        function simulateSaaSARR() {
+            const mrrInit = parseFloat(document.getElementById('saas-mrr').value);
+            const arpu = parseFloat(document.getElementById('saas-arpu').value);
+            const additions = parseFloat(document.getElementById('saas-growth').value);
+            const churnRate = parseFloat(document.getElementById('saas-churn').value) / 100;
+            const expansionRate = parseFloat(document.getElementById('saas-expansion').value) / 100 || 0;
+
+            const box = document.getElementById('res-saas'); if (!mrrInit || !arpu || isNaN(additions)) return;
+            box.style.display = "block";
+
+            let mrr = mrrInit;
+            let projectionString = "--- 5-YEAR COMPONENT MATRIX PROJECTION ---\n\n";
+
+            for (let y = 1; y <= 5; y++) {
+                // Compounding monthly over 12 months for each year
+                for (let m = 1; m <= 12; m++) {
+                    const newRev = additions * arpu;
+                    const churnLoss = mrr * churnRate;
+                    const expansionGain = mrr * expansionRate;
+                    mrr = mrr + newRev + expansionGain - churnLoss;
+                }
+                const arr = mrr * 12;
+                projectionString += `Year ${y} End:\n - MRR: ₦${Math.round(mrr).toLocaleString()}\n - ARR: ₦${Math.round(arr).toLocaleString()}\n\n`;
+            }
+
+            box.innerText = projectionString;
+        }
+    </script>
+</body>
+  </html>

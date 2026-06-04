@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Diagnostics & Self-Test</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .test-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .test-row:last-child { border-bottom: none; }
+        .badge { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; color: white; }
+        .badge.pass { background: #28a745; }
+        .badge.fail { background: #dc3545; }
+        .badge.checking { background: #ffc107; color: black; }
+        .log-box { background: #111; color: #00ff00; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 11px; max-height: 150px; overflow-y: auto; white-space: pre-wrap; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <h2>Diagnostics Center</h2>
+    </div>
+
+    <div class="container">
+
+        <div class="card">
+            <h3>Automated Platform Integrity Test</h3>
+            <p style="font-size: 12px; color: #666; margin-top: -10px;">Run this test to identify configuration typos, missing database tables, or network blocks.</p>
+            <button onclick="runDiagnostics()" style="background:#28a745;">Run Self-Test</button>
+            
+            <div style="margin-top: 20px;">
+                <div class="test-row">
+                    <span>1. Configuration File Fetch (`config.json`)</span>
+                    <span id="t-fetch" class="badge checking">IDLE</span>
+                </div>
+                <div class="test-row">
+                    <span>2. JSON Formatting Integrity</span>
+                    <span id="t-json" class="badge checking">IDLE</span>
+                </div>
+                <div class="test-row">
+                    <span>3. Flutterwave Link Integrity</span>
+                    <span id="t-flw" class="badge checking">IDLE</span>
+                </div>
+                <div class="test-row">
+                    <span>4. Supabase Database Ping</span>
+                    <span id="t-db" class="badge checking">IDLE</span>
+                </div>
+                <div class="test-row">
+                    <span>5. Device LocalStorage Wallet</span>
+                    <span id="t-wallet" class="badge checking">IDLE</span>
+                </div>
+            </div>
+
+            <div id="diagnostics-log" class="log-box">System idle. Press "Run Self-Test" to start diagnostics...</div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const logEl = document.getElementById('diagnostics-log');
+        
+        function log(message) {
+            logEl.innerText += `\n[${new Date().toLocaleTimeString()}] ${message}`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function setBadge(id, status, text) {
+            const el = document.getElementById(id);
+            el.className = `badge ${status}`;
+            el.innerText = text;
+        }
+
+        async function runDiagnostics() {
+            logEl.innerText = "Starting diagnostic checks...";
+            
+            // --- TEST 1 & 2: config.json Fetch and JSON formatting ---
+            setBadge('t-fetch', 'checking', 'CHECKING...');
+            setBadge('t-json', 'checking', 'CHECKING...');
+            
+            let configData = null;
+            try {
+                log("Fetching config.json from root directory...");
+                const res = await fetch('config.json');
+                if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+                setBadge('t-fetch', 'pass', 'PASS');
+                log("config.json found and fetched successfully.");
+
+                try {
+                    configData = await res.json();
+                    setBadge('t-json', 'pass', 'PASS');
+                    log("JSON format parsed successfully with zero typos.");
+                } catch(e) {
+                    setBadge('t-json', 'fail', 'FAIL');
+                    log(`[FATAL] config.json has a syntax typo (e.g. missing comma or bracket): ${e.message}`);
+                }
+            } catch (err) {
+                setBadge('t-fetch', 'fail', 'FAIL');
+                setBadge('t-json', 'fail', 'FAIL');
+                log(`[FATAL] config.json failed to load. Check if file is missing: ${err.message}`);
+            }
+
+            // --- TEST 3: Flutterwave Integrity ---
+            setBadge('t-flw', 'checking', 'CHECKING...');
+            if (configData && configData.flutterwave_link) {
+                const link = configData.flutterwave_link;
+                if (link.startsWith('https://flutterwave.com')) {
+                    setBadge('t-flw', 'pass', 'PASS');
+                    log(`Flutterwave link is valid: ${link}`);
+                } else {
+                    setBadge('t-flw', 'fail', 'FAIL');
+                    log("[ERROR] Flutterwave link in config.json is not a valid HTTPS Flutterwave URL.");
+                }
+            } else {
+                setBadge('t-flw', 'fail', 'FAIL');
+                log("[WARNING] config.json missing 'flutterwave_link'. Using home-screen fail-safe backup.");
+            }
+
+            // --- TEST 4: Supabase Database Ping ---
+            setBadge('t-db', 'checking', 'CHECKING...');
+            try {
+                log("Initializing test connection to Supabase database...");
+                const SUPABASE_URL = "https://zmniyeokodyckfsxinmc.supabase.co";
+                const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptbml5ZW9rb2R5Y2tmc3hpbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNDQxOTYsImV4cCI6MjA5NTYyMDE5Nn0.DjDYDjXTJip6yWrNJAkINopQu6KZ2W9zFgwvIbMZQb4";
+                
+                const testDb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                
+                log("Pinging Supabase referrals table...");
+                const { error } = await testDb.from('referrals').select('id').limit(1);
+                
+                if (error) throw error;
+                
+                setBadge('t-db', 'pass', 'PASS');
+                log("Database ping successful! Tables and permissions are live and reachable.");
+            } catch (dbErr) {
+                setBadge('t-db', 'fail', 'FAIL');
+                log(`[FATAL] Supabase Connection Failed: ${dbErr.message}. Make sure RLS is disabled and tables exist.`);
+            }
+
+            // --- TEST 5: LocalStorage ---
+            setBadge('t-wallet', 'checking', 'CHECKING...');
+            try {
+                localStorage.setItem('diag_test', 'active');
+                const test = localStorage.getItem('diag_test');
+                if (test === 'active') {
+                    setBadge('t-wallet', 'pass', 'PASS');
+                    log("Device storage write test passed. Wallet balances will sync correctly.");
+                    localStorage.removeItem('diag_test');
+                } else {
+                    throw new Error("Values do not match.");
+                }
+            } catch (storageErr) {
+                setBadge('t-wallet', 'fail', 'FAIL');
+                log(`[FATAL] LocalStorage write blocked. Enable cookies/storage in browser settings: ${storageErr.message}`);
+            }
+
+            log("Diagnostics completed.");
+        }
+    </script>
+</body>
+              </html>

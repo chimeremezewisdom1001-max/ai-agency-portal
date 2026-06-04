@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Inventory Optimizer Suite</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 12px; text-align: left; display: none; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Tool 10: EOQ Optimizer -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">INVENTORY PRO (10)</span>
+            <h3>Economic Order Quantity (EOQ) Optimizer</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Finds the mathematically optimal order size to minimize both setup and holding costs.</p>
+            <input type="number" id="eoq-demand" placeholder="Annual Unit Demand (units)">
+            <input type="number" id="eoq-setup" placeholder="Order Placement Cost (₦/order)">
+            <input type="number" id="eoq-holding" placeholder="Holding Cost per Unit/Year (₦)">
+            <button onclick="calculateEOQ()" style="background:#28a745;">Calculate EOQ</button>
+            <div id="res-eoq" class="result"></div>
+        </div>
+
+        <!-- Bonus Tool: Reorder Point -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">INVENTORY PRO</span>
+            <h3>Reorder Point (ROP) & Safety Stock</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Calculate exactly when to order new stock to prevent warehouse stockouts.</p>
+            <input type="number" id="rop-daily" placeholder="Average Daily Unit Sales">
+            <input type="number" id="rop-lead" placeholder="Supplier Lead Time (Days)">
+            <input type="number" id="rop-safety" placeholder="Safety Stock Buffer (Units)">
+            <button onclick="calculateROP()" style="background:#1877f2;">Calculate Reorder Point</button>
+            <div id="res-rop" class="result"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        function calculateEOQ() {
+            const d = parseFloat(document.getElementById('eoq-demand').value);
+            const s = parseFloat(document.getElementById('eoq-setup').value);
+            const h = parseFloat(document.getElementById('eoq-holding').value);
+            const box = document.getElementById('res-eoq'); if (!d || !s || !h) return;
+            box.style.display = "block";
+
+            // Classic Wilson EOQ Formula: SQRT((2 * D * S) / H)
+            const optimalUnits = Math.sqrt((2 * d * s) / h);
+            const totalOrders = d / optimalUnits;
+            const annualSetupCost = totalOrders * s;
+            const annualHoldingCost = (optimalUnits / 2) * h;
+            const totalCost = annualSetupCost + annualHoldingCost;
+
+            box.innerText = `Optimal Order Size: ${Math.round(optimalUnits).toLocaleString()} Units\nOptimal Orders per Year: ${totalOrders.toFixed(1)}\n\nAnnual Order Setup Cost: ₦${Math.round(annualSetupCost).toLocaleString()}\nAnnual Holding Cost: ₦${Math.round(annualHoldingCost).toLocaleString()}\nMinimized Total Inventory Cost: ₦${Math.round(totalCost).toLocaleString()}`;
+        }
+
+        function calculateROP() {
+            const daily = parseFloat(document.getElementById('rop-daily').value);
+            const lead = parseFloat(document.getElementById('rop-lead').value);
+            const safety = parseFloat(document.getElementById('rop-safety').value) || 0;
+            const box = document.getElementById('res-rop'); if (!daily || !lead) return;
+            box.style.display = "block";
+
+            // ROP Formula: (Lead Time * Daily Sales) + Safety Stock
+            const demandDuringLead = daily * lead;
+            const rop = demandDuringLead + safety;
+
+            box.innerText = `Reorder Point (ROP): ${Math.round(rop).toLocaleString()} Units\n\nInstructions:\nPlace a new order as soon as your warehouse stock drops to ${Math.round(rop).toLocaleString()} units to ensure continuous operations.`;
+        }
+    </script>
+</body>
+  </html>

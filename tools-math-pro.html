@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Math & Statistics Suite</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, textarea { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 12px; text-align: left; display: none; white-space: pre-wrap; }
+        canvas { background: #fafafa; border: 1px solid #ddd; border-radius: 8px; width: 100%; height: 250px; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Tool 1: Graphing -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">PREMIUM MATH (1)</span>
+            <h3>Interactive 2D Graphing Calculator</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Renders functions dynamically (e.g., enter <code>Math.sin(x)</code> or <code>x * x</code>).</p>
+            <input type="text" id="graph-func" value="Math.sin(x)" placeholder="e.g. x * x">
+            <button onclick="drawGraph()">Plot Function</button>
+            <canvas id="graphCanvas" height="250" style="display:block;"></canvas>
+        </div>
+
+        <!-- Tool 2: Matrix Solver -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">PREMIUM MATH (2)</span>
+            <h3>3x3 Matrix & Linear Solver</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Enter values for a 3x3 matrix to calculate determinant and properties.</p>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom:10px;">
+                <input type="number" id="m00" value="1" style="width:75%; margin:0;">
+                <input type="number" id="m01" value="2" style="width:75%; margin:0;">
+                <input type="number" id="m02" value="3" style="width:75%; margin:0;">
+                <input type="number" id="m10" value="0" style="width:75%; margin:0;">
+                <input type="number" id="m11" value="1" style="width:75%; margin:0;">
+                <input type="number" id="m12" value="4" style="width:75%; margin:0;">
+                <input type="number" id="m20" value="5" style="width:75%; margin:0;">
+                <input type="number" id="m21" value="6" style="width:75%; margin:0;">
+                <input type="number" id="m22" value="0" style="width:75%; margin:0;">
+            </div>
+            <button onclick="solveMatrix()">Solve Matrix</button>
+            <div id="res-matrix" class="result"></div>
+        </div>
+
+        <!-- Tool 3: Stats -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">PREMIUM MATH (3)</span>
+            <h3>Statistical Analysis Engine</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Enter comma-separated numbers to run full deviations and distribution plot.</p>
+            <textarea id="stats-data" placeholder="e.g. 10, 15, 20, 20, 35, 40, 50"></textarea>
+            <button onclick="analyzeStats()">Analyze Dataset</button>
+            <div id="res-stats" class="result"></div>
+            <canvas id="statsCanvas" height="150"></canvas>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        // 2D Function Plotter using HTML5 Canvas
+        function drawGraph() {
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            const funcText = document.getElementById('graph-func').value;
+            
+            // Clear and draw grid lines
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            
+            // Draw Axes
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2);
+            ctx.lineTo(canvas.width, canvas.height / 2);
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+
+            // Evaluate and plot function
+            ctx.strokeStyle = '#1877f2';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            const scaleX = 20; // Pixels per unit X
+            const scaleY = 20; // Pixels per unit Y
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            for (let px = 0; px < canvas.width; px++) {
+                const x = (px - centerX) / scaleX;
+                try {
+                    const y = eval(funcText);
+                    const py = centerY - (y * scaleY);
+                    if (px === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                } catch(e) {}
+            }
+            ctx.stroke();
+        }
+
+        // Solve Matrix Determinant
+        function solveMatrix() {
+            const m00 = parseFloat(document.getElementById('m00').value);
+            const m01 = parseFloat(document.getElementById('m01').value);
+            const m02 = parseFloat(document.getElementById('m02').value);
+            const m10 = parseFloat(document.getElementById('m10').value);
+            const m11 = parseFloat(document.getElementById('m11').value);
+            const m12 = parseFloat(document.getElementById('m12').value);
+            const m20 = parseFloat(document.getElementById('m20').value);
+            const m21 = parseFloat(document.getElementById('m21').value);
+            const m22 = parseFloat(document.getElementById('m22').value);
+
+            const det = m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20);
+            const box = document.getElementById('res-matrix'); box.style.display = "block";
+            box.innerText = `--- 3x3 MATRIX PROOF ---\nDeterminant: ${det}\n\nMatrix is ${det === 0 ? "Singular (No Inverse)" : "Invertible"}`;
+        }
+
+        // Statistical Analysis
+        function analyzeStats() {
+            const raw = document.getElementById('stats-data').value;
+            const data = raw.split(',').map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+            const box = document.getElementById('res-stats'); if (data.length === 0) return;
+            box.style.display = "block";
+
+            const sum = data.reduce((a, b) => a + b, 0);
+            const mean = sum / data.length;
+            const variance = data.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / data.length;
+            const stdDev = Math.sqrt(variance);
+
+            box.innerText = `Sample Count: ${data.length}\nMean: ${mean.toFixed(2)}\nVariance: ${variance.toFixed(2)}\nStd Deviation: ${stdDev.toFixed(2)}`;
+
+            // Render stats histogram
+            const canvas = document.getElementById('statsCanvas'); canvas.style.display = "block";
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "#1877f2";
+            data.forEach((val, idx) => {
+                const height = (val / Math.max(...data)) * (canvas.height - 20);
+                ctx.fillRect(idx * 25 + 10, canvas.height - height, 15, height);
+            });
+        }
+
+        window.addEventListener('load', drawGraph);
+    </script>
+</body>
+  </html>

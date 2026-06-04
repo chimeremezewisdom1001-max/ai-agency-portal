@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Scientific & Periodic Suite</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, select { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 12px; text-align: left; display: none; white-space: pre-wrap; }
+        
+        /* Scientific Calculator Keys */
+        .sci-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 10px; }
+        .sci-btn { background: #e4e6eb; color: black; padding: 10px 4px; font-size: 13px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
+        .sci-btn.op { background: #f5a623; color: white; }
+        .sci-btn.eq { background: #28a745; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Calculator -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">STUDENT VALUE (1)</span>
+            <h3>Scientific Calculator Pro</h3>
+            <input type="text" id="sci-screen" readonly placeholder="0" style="text-align: right; font-size: 22px; font-weight: bold; width: 90%;">
+            <div class="sci-grid">
+                <button class="sci-btn" onclick="clearSci()" style="background: red; color: white;">C</button>
+                <button class="sci-btn" onclick="pressSci('(')">(</button>
+                <button class="sci-btn" onclick="pressSci(')')">)</button>
+                <button class="sci-btn op" onclick="backspaceSci()">⌫</button>
+                <button class="sci-btn op" onclick="pressSci('/')">/</button>
+
+                <button class="sci-btn" onclick="mathFunc('sin')">sin</button>
+                <button class="sci-btn" onclick="pressSci('7')">7</button>
+                <button class="sci-btn" onclick="pressSci('8')">8</button>
+                <button class="sci-btn" onclick="pressSci('9')">9</button>
+                <button class="sci-btn op" onclick="pressSci('*')">*</button>
+
+                <button class="sci-btn" onclick="mathFunc('cos')">cos</button>
+                <button class="sci-btn" onclick="pressSci('4')">4</button>
+                <button class="sci-btn" onclick="pressSci('5')">5</button>
+                <button class="sci-btn" onclick="pressSci('6')">6</button>
+                <button class="sci-btn op" onclick="pressSci('-')">-</button>
+
+                <button class="sci-btn" onclick="mathFunc('tan')">tan</button>
+                <button class="sci-btn" onclick="pressSci('1')">1</button>
+                <button class="sci-btn" onclick="pressSci('2')">2</button>
+                <button class="sci-btn" onclick="pressSci('3')">3</button>
+                <button class="sci-btn op" onclick="pressSci('+')">+</button>
+
+                <button class="sci-btn" onclick="mathFunc('log')">log</button>
+                <button class="sci-btn" onclick="pressSci('0')">0</button>
+                <button class="sci-btn" onclick="pressSci('.')">.</button>
+                <button class="sci-btn" onclick="mathFunc('sqrt')">√</button>
+                <button class="sci-btn eq" onclick="solveSci()">=</button>
+
+                <button class="sci-btn" onclick="mathFunc('pi')">π</button>
+                <button class="sci-btn" onclick="mathFunc('e')">e</button>
+                <button class="sci-btn" onclick="pressSci('**')">xʸ</button>
+                <button class="sci-btn" style="grid-column: span 2; background:#65676b; color:white;" onclick="mathFunc('ln')">ln</button>
+            </div>
+        </div>
+
+        <!-- Periodic Table -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">SCIENCE VALUE (2)</span>
+            <h3>Interactive Periodic Table</h3>
+            <p style="font-size: 12px; color: #666; margin-top:-5px;">Select any element to load chemistry profiles, properties, states of matter, and atomic structure.</p>
+            <select id="element-selector" onchange="loadElementDetails()">
+                <option value="">-- Choose an Element --</option>
+                <option value="H">1. Hydrogen (H)</option>
+                <option value="He">2. Helium (He)</option>
+                <option value="Li">3. Lithium (Li)</option>
+                <option value="Be">4. Beryllium (Be)</option>
+                <option value="B">5. Boron (B)</option>
+                <option value="C">6. Carbon (C)</option>
+                <option value="N">7. Nitrogen (N)</option>
+                <option value="O">8. Oxygen (O)</option>
+                <option value="F">9. Fluorine (F)</option>
+                <option value="Ne">10. Neon (Ne)</option>
+                <option value="Na">11. Sodium (Na)</option>
+                <option value="Mg">12. Magnesium (Mg)</option>
+                <option value="Al">13. Aluminum (Al)</option>
+                <option value="Si">14. Silicon (Si)</option>
+                <option value="P">15. Phosphorus (P)</option>
+                <option value="S">16. Sulfur (S)</option>
+                <option value="Cl">17. Chlorine (Cl)</option>
+                <option value="Ar">18. Argon (Ar)</option>
+                <option value="K">19. Potassium (K)</option>
+                <option value="Ca">20. Calcium (Ca)</option>
+                <option value="Fe">26. Iron (Fe)</option>
+                <option value="Cu">29. Copper (Cu)</option>
+                <option value="Au">79. Gold (Au)</option>
+            </select>
+            <div id="res-element" class="result" style="background: #eef7ff; border: 1px solid #bcdbf7; font-size: 13px;"></div>
+        </div>
+
+        <!-- CGPA -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">ACADEMIC VALUE (3)</span>
+            <h3>GPA & CGPA Academic Tracker</h3>
+            <div id="gpa-inputs">
+                <div style="display:flex; gap:5px; margin-bottom:5px;">
+                    <input type="number" placeholder="Credit Units" class="gpa-unit" style="flex:1; margin-bottom:0;">
+                    <select class="gpa-grade" style="flex:1; margin-bottom:0;">
+                        <option value="5">A (5.0)</option>
+                        <option value="4">B (4.0)</option>
+                        <option value="3">C (3.0)</option>
+                        <option value="2">D (2.0)</option>
+                        <option value="1">E (1.0)</option>
+                        <option value="0">F (0.0)</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex; gap:5px; margin-top:10px;">
+                <button onclick="addGPALine()" style="background: #65676b;">+ Add Course</button>
+                <button onclick="calculateGPA()" style="background: #28a745;">Calculate GPA</button>
+            </div>
+            <div id="res-gpa" class="result"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        // Scientific Calculator Logic
+        const scr = document.getElementById('sci-screen');
+        function pressSci(val) { scr.value === "0" || scr.value === "Error" ? scr.value = val : scr.value += val; }
+        function clearSci() { scr.value = "0"; }
+        function backspaceSci() { scr.value = scr.value.slice(0, -1) || "0"; }
+        function solveSci() {
+            try {
+                let v = scr.value;
+                v = v.replace(/π/g, 'Math.PI').replace(/e/g, 'Math.E');
+                scr.value = Function(`"use strict"; return (${v})`)();
+            } catch (e) { scr.value = "Error"; }
+        }
+        function mathFunc(type) {
+            try {
+                if (type === 'sin') scr.value = Math.sin(eval(scr.value) * Math.PI / 180).toFixed(6);
+                if (type === 'cos') scr.value = Math.cos(eval(scr.value) * Math.PI / 180).toFixed(6);
+                if (type === 'tan') scr.value = Math.tan(eval(scr.value) * Math.PI / 180).toFixed(6);
+                if (type === 'log') scr.value = Math.log10(eval(scr.value)).toFixed(6);
+                if (type === 'ln') scr.value = Math.log(eval(scr.value)).toFixed(6);
+                if (type === 'sqrt') scr.value = Math.sqrt(eval(scr.value)).toFixed(6);
+                if (type === 'pi') pressSci('π');
+                if (type === 'e') pressSci('e');
+            } catch(e) { scr.value = "Error"; }
+        }
+
+        // Periodic Table Database
+        const elements = {
+            H: { name: "Hydrogen", num: 1, sym: "H", state: "Gas", mass: 1.008, density: "0.08988 kg/m³", p: 1, n: 0, e: 1, type: "Reactive Nonmetal" },
+            He: { name: "Helium", num: 2, sym: "He", state: "Gas", mass: 4.0026, density: "0.1786 kg/m³", p: 2, n: 2, e: 2, type: "Noble Gas" },
+            Li: { name: "Lithium", num: 3, sym: "Li", state: "Solid", mass: 6.94, density: "534 kg/m³", p: 3, n: 4, e: 3, type: "Alkali Metal" },
+            Be: { name: "Beryllium", num: 4, sym: "Be", state: "Solid", mass: 9.0122, density: "1850 kg/m³", p: 4, n: 5, e: 4, type: "Alkaline Earth Metal" },
+            B: { name: "Boron", num: 5, sym: "B", state: "Solid", mass: 10.81, density: "2340 kg/m³", p: 5, n: 6, e: 5, type: "Metalloid" },
+            C: { name: "Carbon", num: 6, sym: "C", state: "Solid", mass: 12.011, density: "2267 kg/m³", p: 6, n: 6, e: 6, type: "Reactive Nonmetal" },
+            N: { name: "Nitrogen", num: 7, sym: "N", state: "Gas", mass: 14.007, density: "1.2506 kg/m³", p: 7, n: 7, e: 7, type: "Reactive Nonmetal" },
+            O: { name: "Oxygen", num: 8, sym: "O", state: "Gas", mass: 15.999, density: "1.429 kg/m³", p: 8, n: 8, e: 8, type: "Reactive Nonmetal" },
+            Na: { name: "Sodium", num: 11, sym: "Na", state: "Solid", mass: 22.990, density: "971 kg/m³", p: 11, n: 12, e: 11, type: "Alkali Metal" },
+            Cl: { name: "Chlorine", num: 17, sym: "Cl", state: "Gas", mass: 35.45, density: "3.214 kg/m³", p: 17, n: 18, e: 17, type: "Reactive Nonmetal" },
+            Fe: { name: "Iron", num: 26, sym: "Fe", state: "Solid", mass: 55.845, density: "7874 kg/m³", p: 26, n: 30, e: 26, type: "Transition Metal" },
+            Au: { name: "Gold", num: 79, sym: "Au", state: "Solid", mass: 196.97, density: "19300 kg/m³", p: 79, n: 118, e: 79, type: "Transition Metal" }
+        };
+
+        function loadElementDetails() {
+            const sym = document.getElementById('element-selector').value;
+            const box = document.getElementById('res-element');
+            if (!sym || !elements[sym]) { box.style.display = "none"; return; }
+            box.style.display = "block";
+            const el = elements[sym];
+            box.innerHTML = `<strong>⚛️ Element: ${el.name} (${el.sym})</strong><br>
+State of Matter: <b>${el.state}</b><br>
+Atomic Number: ${el.num}<br>
+Relative Atomic Mass: ${el.mass} u<br>
+Density (Mass/m³): ${el.density}<br>
+Protons: ${el.p} | Neutrons: ${el.n} | Electrons: ${el.e}<br>
+Classification: <i>${el.type}</i>`;
+        }
+
+        // GPA Calculator
+        function addGPALine() {
+            const container = document.getElementById('gpa-inputs');
+            const div = document.createElement('div');
+            div.style.display = "flex"; div.style.gap = "5px"; div.style.marginTop = "5px";
+            div.innerHTML = `<input type="number" placeholder="Credit Units" class="gpa-unit" style="flex:1; margin-bottom:0;">
+                <select class="gpa-grade" style="flex:1; margin-bottom:0;">
+                    <option value="5">A (5.0)</option>
+                    <option value="4">B (4.0)</option>
+                    <option value="3">C (3.0)</option>
+                    <option value="2">D (2.0)</option>
+                    <option value="1">E (1.0)</option>
+                    <option value="0">F (0.0)</option>
+                </select>`;
+            container.appendChild(div);
+        }
+
+        function calculateGPA() {
+            const units = document.querySelectorAll('.gpa-unit');
+            const grades = document.querySelectorAll('.gpa-grade');
+            const box = document.getElementById('res-gpa'); box.style.display = "block";
+            
+            let totalPoints = 0, totalUnits = 0;
+            for (let i = 0; i < units.length; i++) {
+                const u = parseFloat(units[i].value);
+                const g = parseFloat(grades[i].value);
+                if (u > 0) { totalPoints += (u * g); totalUnits += u; }
+            }
+            if (totalUnits === 0) { box.innerText = "Please input valid credit units."; return; }
+            const gpa = totalPoints / totalUnits;
+            box.innerText = `Total Registered Units: ${totalUnits}\nTotal Grade Points: ${totalPoints}\nSemester GPA: ${gpa.toFixed(2)} / 5.0`;
+        }
+    </script>
+</body>
+  </html>

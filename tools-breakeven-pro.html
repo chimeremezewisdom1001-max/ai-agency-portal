@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Pricing & Marketing ROAS Suite</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 12px; text-align: left; display: none; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Breakeven Solver -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">OPERATIONS (1)</span>
+            <h3>Product Breakeven & Pricing Calculator</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Find exactly how many units you need to sell to cover your fixed operational costs.</p>
+            <input type="number" id="be-fixed" placeholder="Fixed Monthly Costs (₦)">
+            <input type="number" id="be-price" placeholder="Selling Price per Unit (₦)">
+            <input type="number" id="be-variable" placeholder="Variable Production Cost/Unit (₦)">
+            <button onclick="calculateBreakeven()" style="background:#28a745;">Calculate Breakeven</button>
+            <div id="res-breakeven" class="result"></div>
+        </div>
+
+        <!-- Marketing ROAS -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">MARKETING (2)</span>
+            <h3>Ad Spend & ROAS Forecaster</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Forecast ad conversions and target ROAS (Return on Ad Spend).</p>
+            <input type="number" id="mkt-budget" placeholder="Monthly Ad Budget (₦)">
+            <input type="number" id="mkt-cpc" placeholder="Cost Per Click (CPC) (₦)">
+            <input type="number" id="mkt-conv" placeholder="Website Conversion Rate % (e.g. 2)">
+            <input type="number" id="mkt-aov" placeholder="Average Order Value (AOV) (₦)">
+            <button onclick="calculateROAS()" style="background:#1877f2;">Forecast Performance</button>
+            <div id="res-roas" class="result"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        function calculateBreakeven() {
+            const fixed = parseFloat(document.getElementById('be-fixed').value);
+            const price = parseFloat(document.getElementById('be-price').value);
+            const variable = parseFloat(document.getElementById('be-variable').value);
+            const box = document.getElementById('res-breakeven'); if (!fixed || !price) return;
+            box.style.display = "block";
+
+            // Breakeven Units = Fixed / (Price - Variable)
+            const margin = price - variable;
+            if (margin <= 0) {
+                box.innerText = "Error: Selling price must be higher than the variable cost per unit.";
+                return;
+            }
+            const units = fixed / margin;
+            const revenue = units * price;
+
+            box.innerText = `Contribution Margin: ₦${margin.toLocaleString()} per Unit\n\nBreakeven Target:\n - Sell ${Math.ceil(units).toLocaleString()} Units\n - Generate ₦${Math.round(revenue).toLocaleString()} in Revenue`;
+        }
+
+        function calculateROAS() {
+            const budget = parseFloat(document.getElementById('mkt-budget').value);
+            const cpc = parseFloat(document.getElementById('mkt-cpc').value);
+            const convRate = parseFloat(document.getElementById('mkt-conv').value) / 100;
+            const aov = parseFloat(document.getElementById('mkt-aov').value);
+            const box = document.getElementById('res-roas'); if (!budget || !cpc || !convRate || !aov) return;
+            box.style.display = "block";
+
+            // Calculation
+            const clicks = budget / cpc;
+            const sales = clicks * convRate;
+            const revenue = sales * aov;
+            const roas = revenue / budget;
+
+            box.innerText = `Clicks Generated: ${Math.round(clicks).toLocaleString()} Clicks\nOrders Generated: ${sales.toFixed(1)} Orders\nProjected Revenue: ₦${Math.round(revenue).toLocaleString()}\n\nReturn on Ad Spend (ROAS): ${roas.toFixed(2)}x`;
+        }
+    </script>
+</body>
+  </html>

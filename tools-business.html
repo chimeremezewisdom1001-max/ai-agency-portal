@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Ledger & PDF Invoice Suite</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, select { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 12px; text-align: left; display: none; white-space: pre-wrap; }
+        .ledger-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Cash Ledger -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">LEDGER VALUE (1)</span>
+            <h3>Dynamic Business Cash Book</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Record sales (income) and expenses locally to calculate balance sheet profit.</p>
+            <input type="text" id="led-desc" placeholder="Transaction Details (e.g. Sales)">
+            <input type="number" id="led-amt" placeholder="Amount (₦)">
+            <select id="led-type">
+                <option value="income">Income (+)</option>
+                <option value="expense">Expense (-)</option>
+            </select>
+            <button onclick="addLedgerEntry()" style="background:#28a745; margin-bottom:15px;">Post Entry</button>
+            
+            <h4 style="margin:0 0 5px 0;">Total Balance: <span id="led-bal" style="color:green;">₦0.00</span></h4>
+            <div id="ledger-history" style="max-height: 150px; overflow-y:auto; border-top: 1px solid #ccc; padding-top:10px;"></div>
+        </div>
+
+        <!-- Invoice Creator -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">INVOICING VALUE (2)</span>
+            <h3>Professional Receipt & Invoice Generator</h3>
+            <input type="text" id="inv-biz" placeholder="Your Business Name">
+            <input type="text" id="inv-cli" placeholder="Client Name">
+            <input type="text" id="inv-desc" placeholder="Item/Service Description">
+            <input type="number" id="inv-qty" placeholder="Quantity">
+            <input type="number" id="inv-rate" placeholder="Rate / Price per Item (₦)">
+            <button onclick="generateReceipt()" style="background:#1877f2;">Generate Clean Receipt</button>
+            <div id="res-invoice" class="result" style="background:#fff; border: 1px solid #ccc; padding:15px; color:#000;"></div>
+        </div>
+
+        <!-- PAYE Tax Solver -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">TAX VALUE (3)</span>
+            <h3>Nigerian PAYE & VAT Solver</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Calculate 7.5% standard VAT or Personal Income Tax relief cards.</p>
+            <input type="number" id="tax-gross" placeholder="Monthly Gross Salary (₦)">
+            <button onclick="calculatePAYETax()" style="background: #e11d48;">Calculate Tax Sheet</button>
+            <div id="res-tax" class="result"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        // Ledger implementation
+        let ledger = JSON.parse(localStorage.getItem('biz_ledger')) || [];
+        function renderLedger() {
+            const h = document.getElementById('ledger-history'); h.innerHTML = "";
+            let balance = 0;
+            ledger.forEach((item, idx) => {
+                const amt = parseFloat(item.amount);
+                const isInc = item.type === 'income';
+                balance = isInc ? balance + amt : balance - amt;
+                h.innerHTML += `<div class="ledger-row">
+                    <span>${item.desc}</span>
+                    <span style="color:${isInc?'green':'red'};">${isInc?'+':'-'} ₦${amt.toLocaleString()}</span>
+                </div>`;
+            });
+            const balEl = document.getElementById('led-bal');
+            balEl.innerText = `₦${balance.toLocaleString()}`;
+            balEl.style.color = balance >= 0 ? "green" : "red";
+        }
+        function addLedgerEntry() {
+            const desc = document.getElementById('led-desc').value.trim();
+            const amount = parseFloat(document.getElementById('led-amt').value);
+            const type = document.getElementById('led-type').value;
+            if (!desc || !amount) return;
+            ledger.push({ desc, amount, type });
+            localStorage.setItem('biz_ledger', JSON.stringify(ledger));
+            document.getElementById('led-desc').value = "";
+            document.getElementById('led-amt').value = "";
+            renderLedger();
+        }
+
+        // Receipt Creator
+        function generateReceipt() {
+            const biz = document.getElementById('inv-biz').value.trim() || "My Business Ltd";
+            const cli = document.getElementById('inv-cli').value.trim() || "Valued Client";
+            const desc = document.getElementById('inv-desc').value.trim() || "Consulting Service";
+            const qty = parseFloat(document.getElementById('inv-qty').value) || 1;
+            const rate = parseFloat(document.getElementById('inv-rate').value) || 0;
+            
+            const box = document.getElementById('res-invoice'); box.style.display = "block";
+            const subtotal = qty * rate;
+            const vat = subtotal * 0.075; // 7.5% Nigerian VAT
+            const total = subtotal + vat;
+
+            box.innerHTML = `<div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:8px; margin-bottom:8px;">
+                <strong>${biz.toUpperCase()}</strong><br>
+                <span>OFFICIAL TRANSACTION RECEIPT</span>
+            </div>
+            <b>Client:</b> ${cli}<br>
+            <b>Date:</b> ${new Date().toDateString()}<br>
+            <hr style="border:0; border-top:1px solid #eee;">
+            <table style="width:100%; font-size:12px; text-align:left;">
+                <tr><th>Item</th><th>Qty</th><th>Total</th></tr>
+                <tr><td>${desc}</td><td>${qty}</td><td>₦${subtotal.toLocaleString()}</td></tr>
+            </table>
+            <hr style="border:0; border-top:1px dashed #000;">
+            <div style="text-align:right; font-size:12px;">
+                Subtotal: ₦${subtotal.toLocaleString()}<br>
+                VAT (7.5%): ₦${vat.toLocaleString()}<br>
+                <strong>GRAND TOTAL: ₦${total.toLocaleString()}</strong>
+            </div>`;
+        }
+
+        // PAYE Tax Calculation
+        function calculatePAYETax() {
+            const gross = parseFloat(document.getElementById('tax-gross').value);
+            const box = document.getElementById('res-tax'); if(!gross) return; box.style.display = "block";
+            
+            // Standard Nigerian Personal Income Tax Relief Card calculation
+            const consolidatedRelief = 200000 + (gross * 0.20);
+            const taxableIncome = Math.max(0, gross - consolidatedRelief);
+            
+            // Simple tax progressive rates
+            let tax = 0;
+            if (taxableIncome > 0) {
+                tax = taxableIncome * 0.15; // Average baseline bracket (15%)
+            }
+            const netPay = gross - tax;
+            box.innerText = `Gross Salary: ₦${gross.toLocaleString()}\nConsolidated Relief: ₦${consolidatedRelief.toLocaleString()}\nTaxable Income: ₦${taxableIncome.toLocaleString()}\nPAYE Tax Deduction: ₦${tax.toLocaleString()}\nNet Take-Home: ₦${netPay.toLocaleString()}`;
+        }
+
+        window.addEventListener('load', renderLedger);
+    </script>
+</body>
+              </html>

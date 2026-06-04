@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Science & Physics Lab</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, select { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 12px; text-align: left; display: none; white-space: pre-wrap; }
+        canvas { background: #111; border-radius: 8px; width: 100%; height: 200px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Tool 4: Chemistry -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">SCIENCE SUITE (4)</span>
+            <h3>Molecular Weight & Stoichiometry Engine</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Input molecular formulas (e.g. H2O or CO2) to calculate molecular weights and moles.</p>
+            <input type="text" id="chem-formula" value="H2O" placeholder="e.g. C6H12O6">
+            <input type="number" id="chem-mass" value="18" placeholder="Mass in grams">
+            <button onclick="runChemStoich()">Calculate Yield</button>
+            <div id="res-chem" class="result"></div>
+        </div>
+
+        <!-- Tool 5: Physics Projectile Simulator -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">PHYSICS LAB (5)</span>
+            <h3>Interactive Kinematics Simulator</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Simulate projectile motion vectors by adjusting velocity and angle sliders.</p>
+            
+            <label style="font-size:12px; display:block; margin-bottom:5px;">Launch Angle: <span id="angle-val">45</span>°</label>
+            <input type="range" id="phys-angle" min="10" max="90" value="45" style="width:95%;" oninput="runPhysics()">
+            
+            <label style="font-size:12px; display:block; margin-top:10px; margin-bottom:5px;">Velocity: <span id="vel-val">20</span> m/s</label>
+            <input type="range" id="phys-vel" min="5" max="50" value="20" style="width:95%;" oninput="runPhysics()">
+            
+            <canvas id="physicsCanvas" height="200"></canvas>
+            <div id="res-physics" class="result" style="display:block;"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        // Simple Stoichiometry parser
+        const atomicWeights = { H: 1.008, O: 15.999, C: 12.011, N: 14.007, Na: 22.99, Cl: 35.45 };
+        function runChemStoich() {
+            const f = document.getElementById('chem-formula').value.trim();
+            const mass = parseFloat(document.getElementById('chem-mass').value) || 0;
+            const box = document.getElementById('res-chem'); box.style.display = "block";
+
+            // Simple parser for formulas like H2O, CO2
+            let weight = 0;
+            const regex = /([A-Z][a-z]*)(\d*)/g;
+            let match;
+            while ((match = regex.exec(f)) !== null) {
+                const element = match[1];
+                const count = parseInt(match[2]) || 1;
+                if (atomicWeights[element]) {
+                    weight += atomicWeights[element] * count;
+                }
+            }
+
+            if (weight === 0) { box.innerText = "Unsupported elements. Use basic symbols like H, O, C, Na, Cl."; return; }
+            const moles = mass / weight;
+            box.innerText = `Compound: ${f}\nMolecular Weight: ${weight.toFixed(3)} g/mol\nTotal Moles (for ${mass}g): ${moles.toFixed(4)} mol`;
+        }
+
+        // Kinematics Sandbox Drawer
+        function runPhysics() {
+            const canvas = document.getElementById('physicsCanvas');
+            const ctx = canvas.getContext('2d');
+            const angleDeg = parseFloat(document.getElementById('phys-angle').value);
+            const vel = parseFloat(document.getElementById('phys-vel').value);
+            document.getElementById('angle-val').innerText = angleDeg;
+            document.getElementById('vel-val').innerText = vel;
+
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.strokeStyle = "#00b4d8";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(10, canvas.height - 10);
+
+            const g = 9.8;
+            const angleRad = angleDeg * Math.PI / 180;
+            
+            // Calculate vector flight characteristics
+            const timeOfFlight = (2 * vel * Math.sin(angleRad)) / g;
+            const maxRange = (vel * vel * Math.sin(2 * angleRad)) / g;
+            const maxHeight = (vel * vel * Math.sin(angleRad) * Math.sin(angleRad)) / (2 * g);
+
+            // Draw trajectory path
+            const scaleX = (canvas.width - 20) / Math.max(50, maxRange);
+            const scaleY = (canvas.height - 20) / Math.max(20, maxHeight);
+
+            for (let t = 0; t <= timeOfFlight; t += timeOfFlight / 50) {
+                const x = vel * Math.cos(angleRad) * t;
+                const y = (vel * Math.sin(angleRad) * t) - (0.5 * g * t * t);
+                const px = 10 + (x * scaleX);
+                const py = (canvas.height - 10) - (y * scaleY);
+                ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            document.getElementById('res-physics').innerText = `Flight Duration: ${timeOfFlight.toFixed(2)} seconds\nTotal Range: ${maxRange.toFixed(2)} meters\nMax Peak Height: ${maxHeight.toFixed(2)} meters`;
+        }
+
+        window.addEventListener('load', runPhysics);
+    </script>
+</body>
+                                                         </html>

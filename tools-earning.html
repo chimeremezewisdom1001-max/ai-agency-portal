@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earn Money Portal</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        button.secondary { background: #65676b; }
+        .video-feed { display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: scroll; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #000; }
+        .video-container { position: relative; width: 100%; padding-bottom: 177.77%; height: 0; border-radius: 8px; overflow: hidden; background: #222; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .earn-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .earn-row:last-child { border-bottom: none; }
+        .earn-details { max-width: 70%; }
+        .earn-title { font-weight: bold; margin-bottom: 3px; font-size: 14px; }
+        .earn-desc { font-size: 11px; color: #65676b; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+    <div class="container">
+        <div class="card" style="border-left: 5px solid #28a745;">
+            <h2>Earning Hub & Video Feed</h2>
+            <p style="font-size: 13px; color: #65676b; margin-top: -10px;">
+                Learn the best methods to earn money online. Scroll and watch videos to unlock rewards, or use our premium affiliate links to launch your own business.
+            </p>
+        </div>
+        <div class="card" style="background: #111; color: white;">
+            <h3 style="margin-top: 0; color: var(--primary);">📺 Scroll & Watch Feed</h3>
+            <p style="font-size: 11px; color: #aaa; margin-top: -10px;">Scroll down to watch interesting vertical clips. Every interaction supports our platform!</p>
+            <div class="video-feed">
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/S_B7Xn6NAtE" allowfullscreen></iframe>
+                </div>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/zH3vH4uA4tU" allowfullscreen></iframe>
+                </div>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/WJ69r97nQkQ" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <h3 style="margin-top: 0; border-bottom: 2px solid #28a745; padding-bottom: 8px; color: #28a745;">🚀 Top Earning Methods</h3>
+            <p style="font-size: 12px; color: #65676b; margin-top: -5px;">Select a method below to sign up on official platforms and start earning commissions.</p>
+            <div class="earn-row">
+                <div class="earn-details">
+                    <div class="earn-title">Amazon Affiliate Program</div>
+                    <div class="earn-desc">Recommend Amazon products and earn up to 10% commission on sales.</div>
+                    <button id="amazon-btn" style="background:#f5a623; margin-top:5px; padding:6px; font-size:12px;">Join Amazon associates</button>
+                </div>
+            </div>
+            <div class="earn-row">
+                <div class="earn-details">
+                    <div class="earn-title">Jumia KOL Affiliate</div>
+                    <div class="earn-desc">Promote products in Africa and receive direct cash commissions in Naira.</div>
+                    <button id="jumia-btn" style="background:#f5a623; margin-top:5px; padding:6px; font-size:12px;">Join Jumia Affiliate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        // Fail-safe default affiliate URLs in case config.json is still caching
+        let amazonUrl = "https://amzn.to/43FWWPL";
+        let jumiaUrl = "https://kol.jumia.com";
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                
+                let adScript = document.createElement('script');
+                adScript.src = config.adsterra_script_url;
+                document.body.appendChild(adScript);
+
+                if (config.amazon_affiliate_link) amazonUrl = config.amazon_affiliate_link;
+                if (config.jumia_affiliate_link) jumiaUrl = config.jumia_affiliate_link;
+            } catch (e) {
+                console.log("Config failed. Using default verified affiliate pathways.");
+            }
+            
+            // Bind trigger buttons securely
+            document.getElementById('amazon-btn').onclick = () => window.open(amazonUrl, '_blank');
+            document.getElementById('jumia-btn').onclick = () => window.open(jumiaUrl, '_blank');
+        }
+        window.addEventListener('load', loadGlobalConfig);
+        setInterval(() => {
+            coins = parseInt(localStorage.getItem('user_coins')) || 0;
+            document.getElementById('coin-balance').innerText = coins;
+        }, 3000);
+    </script>
+</body>
+                                                                            </html>

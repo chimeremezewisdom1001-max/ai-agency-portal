@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Payment & Localization Desk</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        input, select, textarea { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+        
+        <!-- Google Translate Interface Dropdown -->
+        <div id="google_translate_element" style="margin-top: 15px;"></div>
+    </div>
+
+    <div class="container">
+
+        <div class="card" style="border-left: 5px solid #1877f2;">
+            <h2 style="margin-top:0;">Global Exchange Desk</h2>
+            <p style="font-size: 13px; color: #65676b; margin-top: -10px;">
+                We accept payments globally from any country. Use card/transfer for immediate processing, or use alternative exchanges (crypto, gift cards, equity shares) to submit manual claim tickets.
+            </p>
+        </div>
+
+        <!-- Automatic Gateways -->
+        <div class="card">
+            <h3>💳 Instant Card & Bank Wire</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Supports Visa, Mastercard, American Express, Apple Pay, Google Pay, and localized bank transfers.</p>
+            <button class="buy" style="background: #28a745;">Pay Securely via Flutterwave</button>
+        </div>
+
+        <!-- Manual Global Claim Desk -->
+        <div class="card">
+            <h3>🤝 Alternative Exchange & Manual Claim</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Use this form to submit gift card codes (iTunes, Amazon, Steam), Bybit crypto transaction hashes, manual bank drafts, or corporate share proposals.</p>
+            
+            <input type="text" id="pay-name" placeholder="Your Full Name">
+            <select id="pay-method">
+                <option value="Gift Card">Gift Card (Steam, iTunes, Amazon)</option>
+                <option value="Bybit Crypto">Bybit Crypto Deposit (USDT, BTC)</option>
+                <option value="Manual Bank Wire">Direct/Manual Bank Transfer</option>
+                <option value="Equity Shares">Company Shares & Equity Deals</option>
+            </select>
+            <input type="text" id="pay-val" placeholder="Value / Amount (e.g. $50 or 50,000 NGN)">
+            <textarea id="pay-details" placeholder="Enter Gift Card PIN, Crypto transaction hash, or bank reference number here..."></textarea>
+            
+            <button onclick="submitAlternativeClaim()" style="background:#f5a623;">Submit Claim Ticket</button>
+        </div>
+
+    </div>
+
+    <!-- Google Translate Script -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <script src="portal-engine.js"></script>
+    <script>
+        const SUPABASE_URL = "https://zmniyeokodyckfsxinmc.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptbml5ZW9rb2R5Y2tmc3hpbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNDQxOTYsImV4cCI6MjA5NTYyMDE5Nn0.DjDYDjXTJip6yWrNJAkINopQu6KZ2W9zFgwvIbMZQb4";
+
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function submitAlternativeClaim() {
+            const name = document.getElementById('pay-name').value.trim();
+            const method = document.getElementById('pay-method').value;
+            const value = document.getElementById('pay-val').value.trim();
+            const details = document.getElementById('pay-details').value.trim();
+
+            if (!name || !value || !details) {
+                alert("Please fill in your name, payment value, and code/details first.");
+                return;
+            }
+
+            try {
+                // 1. Log the transaction directly to your secure Supabase database
+                const { error } = await db.from('payments_claims').insert([
+                    { sender_name: name, payment_method: method, amount_value: value, details_or_code: details }
+                ]);
+
+                if (error) throw error;
+
+                alert("🎉 Ticket submitted successfully! Let's redirect you to WhatsApp for manual verification.");
+
+                // 2. Pre-format a customized WhatsApp message so they can text you directly
+                const waMessage = `Hello, I just submitted an alternative payment claim on your platform.\n\nName: ${name}\nMethod: ${method}\nValue: ${value}\nDetails: ${details}`;
+                const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(waMessage)}`;
+                
+                // Open the chat
+                window.open(waUrl, '_blank');
+
+                // Reset fields
+                document.getElementById('pay-name').value = "";
+                document.getElementById('pay-val').value = "";
+                document.getElementById('pay-details').value = "";
+
+            } catch (e) {
+                console.error(e);
+                alert("Database submission failed. Redirecting to WhatsApp manually.");
+            }
+        }
+    </script>
+</body>
+  </html>

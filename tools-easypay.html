@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyPay Portal - Simple Billing</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        input, select, textarea { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .method-btn { background: #e4e6eb; color: black; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 48%; margin-bottom: 8px; font-size: 12px; }
+        .method-btn.active { background: var(--primary); color: white; }
+        .instruction-box { background: #fff9e6; border: 1px solid #ffe599; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; display: none; }
+        .address-box { background: #f4f4f4; padding: 8px; border-radius: 6px; font-family: monospace; font-size: 11px; word-break: break-all; margin: 5px 0; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <div class="card" style="border-left: 5px solid #28a745;">
+            <h2 style="margin-top:0;">EasyPay Portal</h2>
+            <p style="font-size: 13px; color: #65676b; margin-top: -10px;">
+                We make payment extremely simple. Select your payment method below to see exact, clear instructions on how to pay.
+            </p>
+        </div>
+
+        <!-- STEP 1: Select Method -->
+        <div class="card">
+            <h3 style="margin-top:0;">1. Select How You Want to Pay:</h3>
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+                <button class="method-btn" id="m-opay" onclick="selectMethod('opay')">OPay / PalmPay</button>
+                <button class="method-btn" id="m-bank" onclick="selectMethod('bank')">Other Bank App</button>
+                <button class="method-btn" id="m-crypto" onclick="selectMethod('crypto')">USDT Crypto</button>
+                <button class="method-btn" id="m-gift" onclick="selectMethod('gift')">Gift Card PIN</button>
+            </div>
+
+            <!-- DYNAMIC INSTRUCTIONS -->
+            <div class="instruction-box" id="inst-opay">
+                <strong>How to Pay with OPay / PalmPay:</strong>
+                <ol style="margin: 5px 0 0 0; padding-left: 20px;">
+                    <li>Open your OPay or PalmPay App.</li>
+                    <li>Tap <b>Transfer</b> -> <b>To Bank</b>.</li>
+                    <li>Look at our secure checkout screen for the generated Bank Name and Account Number.</li>
+                    <li>Paste that account number, select the Bank Name, and transfer.</li>
+                </ol>
+            </div>
+
+            <div class="instruction-box" id="inst-bank">
+                <strong>How to Pay with Your Bank App:</strong>
+                <ol style="margin: 5px 0 0 0; padding-left: 20px;">
+                    <li>Log into your standard mobile bank app (GTB, Access, Zenith, etc.).</li>
+                    <li>Go to <b>Transfer</b>.</li>
+                    <li>Copy the Wema/Sterling account details from our secure checkout.</li>
+                    <li>Complete the transfer and save your receipt screenshot.</li>
+                </ol>
+            </div>
+
+            <div class="instruction-box" id="inst-crypto">
+                <strong>How to Pay with USDT (Tron TRC-20):</strong>
+                <p style="margin:5px 0 0 0;">Copy our public Bybit deposit address below, open your wallet, and send the payment:</p>
+                <div class="address-box">TVAa7k383pka9N2rqnZMch62ZQYG1Xx9Kt</div>
+            </div>
+
+            <div class="instruction-box" id="inst-gift">
+                <strong>How to Pay with Gift Cards:</strong>
+                <ol style="margin: 5px 0 0 0; padding-left: 20px;">
+                    <li>Buy a Steam, iTunes, or Amazon Gift Card.</li>
+                    <li>Locate the 16-digit code or PIN on the back.</li>
+                    <li>Type that PIN directly into the claim form below.</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- STEP 2: Claim Form -->
+        <div class="card">
+            <h3 style="margin-top:0;">2. Confirm Your Payment:</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Once you have transferred the funds or bought the card, fill out this simple form to submit your claim ticket.</p>
+            
+            <input type="text" id="claim-name" placeholder="Your Full Name">
+            <input type="text" id="claim-val" placeholder="Amount Sent (e.g. ₦1,000 or $10)">
+            <textarea id="claim-ref" placeholder="Enter OPay transaction ID, bank reference, or Gift Card PIN code..."></textarea>
+            
+            <button onclick="submitEasyPayClaim()" style="background:#28a745;">I Have Sent the Money</button>
+        </div>
+
+    </div>
+
+    <script src="portal-engine.js"></script>
+    <script>
+        const SUPABASE_URL = "https://zmniyeokodyckfsxinmc.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptbml5ZW9rb2R5Y2tmc3hpbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNDQxOTYsImV4cCI6MjA5NTYyMDE5Nn0.DjDYDjXTJip6yWrNJAkINopQu6KZ2W9zFgwvIbMZQb4";
+
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        let selectedPaymentMethod = "Not Selected";
+
+        function selectMethod(method) {
+            // Reset active states
+            document.querySelectorAll('.method-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.instruction-box').forEach(box => box.style.display = 'none');
+
+            // Set active
+            document.getElementById(`m-${method}`).classList.add('active');
+            document.getElementById(`inst-${method}`).style.display = 'block';
+            selectedPaymentMethod = method.toUpperCase();
+        }
+
+        async function submitEasyPayClaim() {
+            const name = document.getElementById('claim-name').value.trim();
+            const value = document.getElementById('claim-val').value.trim();
+            const details = document.getElementById('claim-ref').value.trim();
+
+            if (!name || !value || !details) {
+                alert("Please fill in your name, payment value, and proof reference first.");
+                return;
+            }
+
+            try {
+                // 1. Log the transaction directly to your secure Supabase database
+                const { error } = await db.from('payments_claims').insert([
+                    { sender_name: name, payment_method: `EasyPay: ${selectedPaymentMethod}`, amount_value: value, details_or_code: details }
+                ]);
+
+                if (error) throw error;
+
+                alert("🎉 Payment Claim Logged! Redirecting to WhatsApp for manual verification.");
+
+                // 2. Pre-format a customized WhatsApp message so they can text you directly
+                const waMessage = `Hello Chimeremeze! I just made a payment using your EasyPay Wizard.\n\nName: ${name}\nMethod: ${selectedPaymentMethod}\nValue: ${value}\nReference/PIN: ${details}`;
+                const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(waMessage)}`;
+                
+                window.open(waUrl, '_blank');
+
+                // Reset fields
+                document.getElementById('claim-name').value = "";
+                document.getElementById('claim-val').value = "";
+                document.getElementById('claim-ref').value = "";
+
+            } catch (e) {
+                console.error(e);
+                alert("Database submission failed. Redirecting to WhatsApp manually.");
+            }
+        }
+    </script>
+</body>
+  </html>

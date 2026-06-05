@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Billing & Payments Manual</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        button { background: #65676b; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'">← Back to Dashboard</button>
+        <h2 style="margin-top: 15px; color: var(--primary);">Universal Billing Guide</h2>
+    </div>
+
+    <div class="container">
+
+        <div class="card" style="border-left: 5px solid #f5a623;">
+            <h3>🪙 Why We Charge a Small Fee</h3>
+            <p style="font-size: 13px; line-height: 1.5; color: #555;">
+                We are committed to keeping this platform data-friendly and free from intrusive pop-up advertisements. To maintain our servers, database operations, and live chat, we charge small micro-contributions (₦200 to ₦500) to unlock premium tools. This saves you over <b>₦30,000+</b> compared to buying physical tools.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>🗺️ How to Pay Based on Your Country:</h3>
+            
+            <div style="margin-bottom: 15px;">
+                <strong style="color: #28a745;">🇳🇬 Users in Nigeria:</strong>
+                <p style="font-size: 12px; color: #555; margin: 5px 0 0 0; line-height: 1.5;">
+                    Open the <b>EasyPay Wizard</b>. You can transfer directly to our displayed OPay or Sterling Bank accounts, or use Flutterwave to complete bank/card transfers securely.
+                </p>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <strong style="color: #1877f2;">🌎 Users in US, Canada, Europe, & UK:</strong>
+                <p style="font-size: 12px; color: #555; margin: 5px 0 0 0; line-height: 1.5;">
+                    Open the <b>EasyPay Wizard</b>, click "Global Checkout", and pay securely on our verified checkout portal using your international credit/debit card, Apple Pay, Google Pay, or direct local bank links.
+                </p>
+            </div>
+
+            <div>
+                <strong style="color: #f5a623;">🎁 Global Users (Gift Cards & Crypto):</strong>
+                <p style="font-size: 12px; color: #555; margin: 5px 0 0 0; line-height: 1.5;">
+                    If you prefer alternative systems, you can copy our public TRC-20 USDT address, or purchase a Steam, iTunes, or Amazon gift card and submit the 16-digit PIN code directly into our EasyPay Claim Form.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+  </html>

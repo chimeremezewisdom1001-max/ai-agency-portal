@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social & Utility Suite Dashboard</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 20px; }
+        .header { background: var(--card); padding: 25px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .wallet-badge { background: #e7f3ff; color: var(--primary); padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 15px; }
+        .grid-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card.premium { border-top: 5px solid #28a745; }
+        .card.student { border-top: 5px solid #e11d48; }
+        .card.business { border-top: 5px solid #f5a623; }
+        .nav-btn { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; text-align: center; }
+        .btn-desc { font-size: 12px; color: #65676b; margin: 4px 0 15px 5px; line-height: 1.4; }
+        button.buy { background: #f5a623; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- HEADER MODULE -->
+        <div class="header">
+            <div>
+                <h1 style="margin:0; color: var(--primary); font-size: 24px;">Social & Utility Suite Dashboard</h1>
+                <div id="vip-status" style="font-size: 13px; color: #65676b; margin-top: 5px;">Basic Account</div>
+            </div>
+            <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+            <div id="google_translate_element"></div>
+        </div>
+
+        <!-- RECHARGE & AFFILIATE HERO SECTION -->
+        <div class="grid-layout">
+            <div class="card" style="background: #fff9e6; border: 1px solid #ffe599; display: flex; align-items: center; gap: 15px;">
+                <a id="sponsor-link" href="https://amzn.to/43FWWPL" target="_blank" style="text-decoration: none; color: inherit; display: flex; gap: 15px; flex-wrap: wrap;">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150" alt="Sponsor" style="border-radius: 8px; width: 80px; height: 80px; object-fit: cover;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <span style="font-weight: bold; color: #b7791f; font-size: 10px; display: block;">SPONSORED DEAL</span>
+                        <strong style="font-size: 13px;">ASUS ROG Strix SCAR 18 Laptop</strong>
+                        <p style="margin: 3px 0 0 0; color: #555; font-size: 11px;">Support our platform by checking out today's best deal on Amazon.</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="card" style="border: 1px dashed var(--primary); display: flex; flex-direction: column; justify-content: center;">
+                <h3 style="margin:0 0 5px 0;">🪙 Recharge Wallet</h3>
+                <p style="font-size: 12px; color: #65676b; margin: 0 0 10px 0;">Unlock premium features instantly or skip all platform ads permanently.</p>
+                <div style="display: flex; gap: 10px;">
+                    <button class="buy" onclick="buyCoins()" style="flex:1;">Buy Coins</button>
+                    <button class="buy" style="background: gold; color: #333; flex:1;" onclick="upgradeVIP()">Lifetime VIP ($5)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- USER GUIDES ACCORDION -->
+        <div class="card" style="background: #e7f3ff; border: 1px solid var(--primary);">
+            <h3 style="margin-top:0; color: var(--primary); font-size: 16px;">📖 User Guides & Billing Manuals</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                <button onclick="window.location.href='tools-guide-academic.html'" style="background: #1877f2;">🎓 Math & Science Tools Guide</button>
+                <button onclick="window.location.href='tools-guide-business.html'" style="background: #1877f2;">💼 Ledger & Business Tools Guide</button>
+                <button onclick="window.location.href='tools-guide-billing.html'" style="background: #f5a623;">💳 Location Billing & Payments</button>
+            </div>
+        </div>
+
+        <!-- MAIN 3-COLUMN SUITE GRID -->
+        <div class="grid-layout">
+            
+            <!-- COLUMN 1: GLOBAL GATEWAYS & SUPPORT DESK -->
+            <div class="card premium">
+                <h2 style="margin-top:0; color:#28a745; font-size:18px;">🌍 Global Gateways & Support Desk</h2>
+                <p style="font-size:12px; color:#666; margin-top:-5px; margin-bottom:20px;">Secure checkout, alternative exchanges, and diagnostics.</p>
+
+                <button class="nav-btn" style="background:#28a745;" onclick="window.location.href='tools-easypay.html'">⚡ EasyPay Wizard</button>
+                <p class="btn-desc">Gives users simple instructions to pay using OPay, local transfer, or gift cards.</p>
+
+                <button class="nav-btn" style="background:#00b4d8;" onclick="window.location.href='tools-buy-crypto.html'">🪙 Instant Crypto Buy Desk</button>
+                <p class="btn-desc">Lets users buy USDT with their bank cards and send it directly to your Bybit wallet.</p>
+
+                <button class="nav-btn" style="background:#e11d48;" onclick="window.location.href='tools-diagnostics.html'">🔧 System Diagnostics</button>
+                <p class="btn-desc">An automated testing panel that diagnoses configuration errors or database logs.</p>
+
+                <button class="nav-btn" style="background:#28a745;" onclick="window.location.href='tools-global-pay.html'">🌎 Global Payments Desk</button>
+                <p class="btn-desc">Provides localized bank wire routes for international clients in the US, UK, and Europe.</p>
+
+                <button class="nav-btn" style="background:#f5a623;" onclick="window.location.href='tools-donation.html'">🪙 Support & Crypto Donations</button>
+                <p class="btn-desc">Enables users to make direct crypto wallet transfers to your Bybit BTC/TRC20 addresses.</p>
+            </div>
+
+            <!-- COLUMN 2: ACADEMIC & STUDENT SCIENCE LABS -->
+            <div class="card student">
+                <h2 style="margin-top:0; color:#e11d48; font-size:18px;">🎓 Academic & Student Science Labs</h2>
+                <p style="font-size:12px; color:#666; margin-top:-5px; margin-bottom:20px;">Replaces school calculators, chart papers, and lab hardware.</p>
+
+                <button class="nav-btn" style="background:#e11d48;" onclick="window.location.href='tools-student.html'">🎒 Student Math & Science Portal</button>
+                <p class="btn-desc">A portal containing scientific calculators, interactive periodic tables, and GPA planners.</p>
+
+                <button class="nav-btn" style="background:#28a745;" onclick="window.location.href='tools-scanner-pro.html'">📊 Cloud-Synced Camera Scanner</button>
+                <p class="btn-desc">Uses your phone camera as an inventory scanner gun to save stocks directly to the cloud.</p>
+
+                <button class="nav-btn" style="background:#1877f2;" onclick="window.location.href='tools-srs-pro.html'">📑 Programmatic Flashcards</button>
+                <p class="btn-desc">An active-recall study card system utilizing memory retention algorithms.</p>
+
+                <button class="nav-btn" style="background:#555;" onclick="window.location.href='tools-obd-pro.html'">🚗 Handheld OBD2 Scanner</button>
+                <p class="btn-desc">Simulates a physical mechanic scanner console to diagnose vehicle engine trouble codes.</p>
+
+                <button class="nav-btn" style="background:#e11d48;" onclick="window.location.href='tools-science-pro.html'">⚛️ Chemistry & Physics Simulator</button>
+                <p class="btn-desc">Calculates chemical stoichiometry yields and plots projectile kinematic vector motion.</p>
+
+                <button class="nav-btn" style="background:#f5a623;" onclick="window.location.href='tools-academic-pro.html'">📅 Target Exam Grade Predictor</button>
+                <p class="btn-desc">Determines the exact percentage score you need on your final exam to pass your courses.</p>
+            </div>
+
+            <!-- COLUMN 3: PRO BUSINESS & UTILITY DESKS -->
+            <div class="card business">
+                <h2 style="margin-top:0; color:#f5a623; font-size:18px;">💼 Pro Business & Operations Desks</h2>
+                <p style="font-size:12px; color:#666; margin-top:-5px; margin-bottom:20px;">Financial forecasting, inventory setups, and invoice generators.</p>
+
+                <button class="nav-btn" style="background:#1877f2;" onclick="window.location.href='tools-pos-pro.html'">📟 Tablet Web-POS Register</button>
+                <p class="btn-desc">Transforms any old tablet or smartphone into a professional retail cash register.</p>
+
+                <button class="nav-btn" style="background:#28a745;" onclick="window.location.href='tools-business.html'">💼 Pro Ledger & Business Desk</button>
+                <p class="btn-desc">A financial terminal containing cash books, receipt creators, and tax calculators.</p>
+
+                <button class="nav-btn" style="background:#555;" onclick="window.location.href='tools-inventory-pro.html'">📦 EOQ Inventory Optimizer</button>
+                <p class="btn-desc">Balances holding and logistical costs to calculate the optimal order size for stock.</p>
+
+                <button class="nav-btn" style="background:#1877f2;" onclick="window.location.href='tools-saas-pro.html'">📊 Subscription ARR Growth Matrix</button>
+                <p class="btn-desc">Simulates compounding MRR, expansion metrics, and ARR growth curves over 5 years.</p>
+
+                <button class="nav-btn" style="background:#555;" onclick="window.location.href='tools-breakeven-pro.html'">📈 Breakeven & Marketing ROAS</button>
+                <p class="btn-desc">Calculates operational breakeven units and forecasts Google/Facebook ad spend ROAS.</p>
+
+                <button class="nav-btn" style="background:#1877f2;" onclick="window.location.href='tools-finance-pro.html'">💹 DCF Valuations & Global Invoicing</button>
+                <p class="btn-desc">Generates discounted cash flow enterprise valuations and optimizes freelance profit targets.</p>
+            </div>
+
+        </div>
+
+        <!-- UTILITY SECTION (HABITS, LOGS & SOCIAL) -->
+        <div class="card" style="background:#eaeaea;">
+            <h4 style="margin-top:0;">Habits, Logs & Social Portal</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                <button onclick="window.location.href='tools-habits.html'" style="background: #25d366;">📅 Daily Habit Tracker (1-7)</button>
+                <button onclick="window.location.href='tools-utility-pro.html'" style="background: #555;">🎧 Study Timer & QR Desk</button>
+                <button onclick="window.location.href='tools-free.html'" style="background: #28a745;">📊 Free Utilities - Part 2 (8-15)</button>
+                <button onclick="window.location.href='tools-premium.html'" style="background: #f5a623;">👑 Premium Pro Planners (16-22)</button>
+                <button onclick="window.location.href='tools-pro.html'" style="background: #e11d48;">🚀 Advanced Pro Tools (23-30)</button>
+                <button onclick="window.location.href='social.html'" style="background: #1877f2;">📰 Real-Time Social Feed & Chat</button>
+                <button onclick="window.location.href='tasks-refer.html'" style="background: #25d366;">📣 Refer & Earn Free Coins</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Google Translate Script Logic -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <!-- Script loading core configurations -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        let flutterwaveUrl = "https://flutterwave.com/pay/aqz0kdnuie6j";
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                if (config.flutterwave_link) flutterwaveUrl = config.flutterwave_link;
+                if (config.amazon_affiliate_link) document.getElementById('sponsor-link').href = config.amazon_affiliate_link;
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("[Fail-safe] using default verified values."); }
+        }
+
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        let isVIP = localStorage.getItem('is_vip') === "true";
+        document.getElementById('coin-balance').innerText = coins;
+        if (isVIP) document.getElementById('vip-status').innerText = "👑 VIP Account (Ad-Free)";
+
+        function upgradeVIP() {
+            if (flutterwaveUrl) window.location.href = flutterwaveUrl;
+            else alert("Loading, please wait...");
+        }
+        function buyCoins() {
+            if (flutterwaveUrl) window.open(flutterwaveUrl, '_blank');
+            else alert("Loading, please wait...");
+        }
+        window.addEventListener('load', loadGlobalConfig);
+    </script>
+</body>
+  </html>

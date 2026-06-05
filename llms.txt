@@ -1,0 +1,41 @@
+# AI Codebase Map: Social & Utility Suite
+This document serves as the absolute context map for any AI model reading, debugging, or modifying this repository.
+
+## 1. Project Overview
+- Owner: Chimeremeze Wisdom Nwachukwu (Username: chimeremezewisdom1001-max)
+- Repository: ai-agency-portal
+- Platform Type: Serverless Static Web Suite (HTML/JS/CSS) hosted on GitHub Pages
+- Global Database: Supabase (Project ID: zmniyeokodyckfsxinmc)
+- Primary Gateways: Flutterwave Checkout, OPay Wallet, Bybit Crypto deposits, Adsterra
+
+## 2. Shared Architecture Rules
+- No Node.js Backend: The live site runs purely in the client browser.
+- No Hardcoded Variables: Global API endpoints, ad scripts, and payment links must load dynamically from config.json.
+- Compact Code Limit: Because the developer edits on an Android mobile device, all HTML files must remain strictly under 305 lines of code to prevent mobile clipboard or browser input cut-off.
+
+## 3. Database Table Schemas (Supabase)
+- Table "posts": columns (id, created_at, author [text], content [text], media_url [text])
+- Table "messages": columns (id, created_at, sender [text], text [text])
+- Table "referrals": columns (id, created_at, referrer_username [text], new_user_ip [text])
+- Table "payments_claims": columns (id, created_at, sender_name [text], payment_method [text], amount_value [text], details_or_code [text], status [text])
+- Table "inventory_logs": columns (id, created_at, item_barcode [text], item_name [text], qty_count [int])
+
+## 4. File Inventory Map
+- index.html: Master responsive dashboard with Google Translate and categorized suites.
+- config.json: Central configuration dictionary (Adsterra URL, Flutterwave Link, local OPay details, local Sterling Bank details).
+- social.html: Real-time global chat and social feed connected to Supabase.
+- tasks-refer.html: WhatsApp referral link generator and coin claim desk.
+- tools-easypay.html: The Open-Layout billing checkout desk.
+- tools-donation.html: Direct Bybit crypto deposit wallet listings (TRC-20, BTC).
+- tools-buy-crypto.html: Embedded Transak credit-card to TRC-20 crypto on-ramp.
+- tools-diagnostics.html: System health checker (tests config, database pings, and storage).
+- tools-habits.html: Daily Habit Tools 1-7 (Water log, journal, step burner, checklist, calculator).
+- tools-student.html: Science & Periodic Table suite (states, atomic mass, protons, neutrons, electrons).
+- tools-business.html: POS Cash Book Ledger, invoicing, and PAYE tax calculator.
+- tools-utility-pro.html: Pomodoro focus timer with programmatically synthesized focus audio.
+- tools-converter-pro.html: Image quality compressor (max 5MB) and text-to-PDF / JSON-to-CSV blob exporter.
+
+## 5. Coding Guidelines for AI Modifiers
+- Always use the unique Supabase variable name `const db = supabase.createClient(...)` instead of `let supabase` to prevent reference shadowing errors.
+- Never write placeholder texts (like PUT_YOUR_KEY_HERE) unless requested. Always use the active verified keys stored in config.json.
+- Always provide the user with direct "Delete" and "Create" GitHub links using the `?filename=` query format to make deployment completely hassle-free on Android.

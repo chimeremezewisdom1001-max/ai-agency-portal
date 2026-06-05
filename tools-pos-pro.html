@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardwareless Web-POS</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        input, select { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .pos-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">HARDWARE REPLACEMENT</span>
+            <h3>Mobile Tablet POS Cash Register</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Cost: <b>1 Coin</b>. Transforms any old phone/tablet into a point-of-sale register.</p>
+            
+            <input type="text" id="pos-name" placeholder="Item Name (e.g. Drink)">
+            <input type="number" id="pos-price" placeholder="Price (₦)">
+            <button onclick="addCartItem()">Add to Cart</button>
+
+            <div style="margin-top: 15px;">
+                <h4 style="margin: 0 0 5px 0;">Cart Checklist:</h4>
+                <div id="cart-list" style="margin-bottom:10px;"></div>
+                <h4 style="margin:0 0 10px 0;">Grand Total: <span id="cart-total" style="color:green;">₦0.00</span></h4>
+                <button onclick="checkoutPOS()" style="background:#28a745;">Checkout & Print Receipt</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        let cart = [];
+        function addCartItem() {
+            const name = document.getElementById('pos-name').value.trim();
+            const price = parseFloat(document.getElementById('pos-price').value);
+            if (!name || !price) return;
+
+            cart.push({ name, price });
+            document.getElementById('pos-name').value = "";
+            document.getElementById('pos-price').value = "";
+            renderCart();
+        }
+
+        function renderCart() {
+            const list = document.getElementById('cart-list'); list.innerHTML = "";
+            let total = 0;
+            cart.forEach(item => {
+                total += item.price;
+                list.innerHTML += `<div class="pos-item"><span>🛍️ ${item.name}</span><strong>₦${item.price.toLocaleString()}</strong></div>`;
+            });
+            document.getElementById('cart-total').innerText = `₦${total.toLocaleString()}`;
+        }
+
+        function checkoutPOS() {
+            if (coins < 1) {
+                alert("Need 1 Coin! Redirecting to EasyPay to buy coins.");
+                window.location.href = "tools-easypay.html";
+                return;
+            }
+            if (cart.length === 0) return;
+
+            // Deduct Coins
+            coins -= 1;
+            localStorage.setItem('user_coins', coins);
+            document.getElementById('coin-balance').innerText = coins;
+
+            alert("Checkout complete! Launching device printer interface.");
+            window.print();
+            cart = [];
+            renderCart();
+        }
+    </script>
+</body>
+              </html>

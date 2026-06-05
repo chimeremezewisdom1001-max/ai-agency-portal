@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Spin & Reward Wheel</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        canvas { background: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">DAILY GIVEAWAY</span>
+            <h3>Spin the Fortune Wheel</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px; margin-bottom:15px;">Get 1 free spin every 24 hours to win free utility coins!</p>
+            
+            <!-- Spinning Wheel Canvas -->
+            <canvas id="wheelCanvas" width="260" height="260"></canvas>
+            <button id="spin-btn" onclick="spinWheel()">SPIN FOR FREE</button>
+            <p id="cooldown-msg" style="display:none; font-size:11px; color:red; margin-top:8px;"></p>
+        </div>
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        // Wheel Setup
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const segments = ["Try Again", "+2 Coins", "Try Again", "+5 Coins", "Try Again", "+10 Coins"];
+        const colors = ["#e4e6eb", "#1877f2", "#e4e6eb", "#28a745", "#e4e6eb", "#f5a623"];
+        
+        let startAngle = 0;
+        const arc = Math.PI / (segments.length / 2);
+
+        function drawWheel() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            for (let i = 0; i < segments.length; i++) {
+                const angle = startAngle + i * arc;
+                ctx.fillStyle = colors[i];
+                ctx.beginPath();
+                ctx.arc(130, 130, 120, angle, angle + arc, false);
+                ctx.lineTo(130, 130);
+                ctx.fill();
+
+                // Draw Text labels
+                ctx.save();
+                ctx.fillStyle = colors[i] === "#e4e6eb" ? "#000" : "#fff";
+                ctx.translate(130 + Math.cos(angle + arc / 2) * 80, 130 + Math.sin(angle + arc / 2) * 80);
+                ctx.rotate(angle + arc / 2 + Math.PI / 2);
+                ctx.font = "bold 11px sans-serif";
+                ctx.fillText(segments[i], -ctx.measureText(segments[i]).width / 2, 0);
+                ctx.restore();
+            }
+            // Draw Center Pin Indicator
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.moveTo(130 - 10, 130);
+            ctx.lineTo(130 + 10, 130);
+            ctx.lineTo(130, 130 - 20);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function spinWheel() {
+            const lastSpin = localStorage.getItem('last_spin_time');
+            const now = Date.now();
+
+            // Enforce 24 hour cooldown (86,400,000 milliseconds)
+            if (lastSpin && (now - lastSpin < 24 * 60 * 60 * 1000)) {
+                const hoursLeft = Math.ceil((24 * 60 * 60 * 1000 - (now - lastSpin)) / (1000 * 60 * 60));
+                alert(`Cooldown active! Come back in ${hoursLeft} hour(s) for your next free spin.`);
+                return;
+            }
+
+            document.getElementById('spin-btn').disabled = true;
+            localStorage.setItem('last_spin_time', now);
+
+            let spinAngleStart = Math.random() * 10 + 10;
+            let spinTime = 0;
+            let spinTimeTotal = Math.random() * 3 + 4 * 1000;
+
+            function rotateWheel() {
+                spinTime += 30;
+                if (spinTime >= spinTimeTotal) {
+                    stopRotate();
+                    return;
+                }
+                const spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+                startAngle += (spinAngle * Math.PI / 180);
+                drawWheel();
+                requestAnimationFrame(rotateWheel);
+            }
+
+            function stopRotate() {
+                const degrees = startAngle * 180 / Math.PI + 90;
+                const arcd = arc * 180 / Math.PI;
+                const index = Math.floor((360 - (degrees % 360)) / arcd);
+                const win = segments[index];
+
+                alert(`🎯 Result: ${win}!`);
+
+                if (win.includes("+2")) coins += 2;
+                if (win.includes("+5")) coins += 5;
+                if (win.includes("+10")) coins += 10;
+
+                localStorage.setItem('user_coins', coins);
+                document.getElementById('coin-balance').innerText = coins;
+                document.getElementById('spin-btn').disabled = false;
+            }
+
+            function easeOut(t, b, c, d) {
+                const ts = (t /= d) * t;
+                const tc = ts * t;
+                return b + c * (tc + -3 * ts + 3 * t);
+            }
+
+            rotateWheel();
+        }
+
+        window.addEventListener('load', drawWheel);
+    </script>
+</body>
+  </html>

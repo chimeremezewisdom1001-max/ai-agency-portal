@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social & Utility Suite</title>
+    <!-- Shared Database Engine -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        input, select, textarea { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .address-box { background: #f4f4f4; padding: 8px; border-radius: 6px; font-family: monospace; font-size: 11px; word-break: break-all; margin: 5px 0; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+        <div id="google_translate_element" style="margin-top: 15px;"></div>
+    </div>
+
+    <div class="container">
+        <!-- Magic content injection placeholder -->
+        {{CONTENT}}
+    </div>
+
+    <!-- Google Translate Script Logic -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <script>
+        // Shared global variables
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        let isVIP = localStorage.getItem('is_vip') === "true";
+        let flutterwaveUrl = "https://flutterwave.com/pay/aqz0kdnuie6j";
+        window.db = null;
+
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                
+                if (config.flutterwave_link) flutterwaveUrl = config.flutterwave_link;
+                
+                // Initialize Database securely inside the master template
+                if (config.supabase) {
+                    window.db = supabase.createClient(config.supabase.url, config.supabase.anon_key);
+                }
+
+                // Inject Adsterra Ads dynamically
+                if (!isVIP && config.adsterra_script_url) {
+                    let adScript = document.createElement('script'); 
+                    adScript.src = config.adsterra_script_url; 
+                    document.body.appendChild(adScript);
+                }
+
+                // Call custom page setups if declared
+                if (typeof onTemplateReady === 'function') {
+                    onTemplateReady(config);
+                }
+            } catch (e) { console.log("[Fail-safe] using default verified values."); }
+        }
+
+        function checkCoins(cost) {
+            if (coins < cost) {
+                alert("Need " + cost + " Coins! Redirecting to EasyPay to buy coins.");
+                window.location.href = "tools-easypay.html";
+                return false;
+            }
+            return true;
+        }
+
+        function deductCoins(cost) {
+            coins -= cost;
+            localStorage.setItem('user_coins', coins);
+            document.getElementById('coin-balance').innerText = coins;
+        }
+
+        window.addEventListener('load', loadGlobalConfig);
+    </script>
+</body>
+  </html>

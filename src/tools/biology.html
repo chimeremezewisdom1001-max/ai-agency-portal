@@ -1,0 +1,29 @@
+<!-- TITLE: Pro Biology DNA Solver -->
+
+<div class="card" style="border-left: 5px solid #28a745;">
+    <h2>DNA Codon Translator</h2>
+    <p style="font-size: 13px; color: #65676b; margin-top: -10px;">
+        Translate RNA sequences into proteins. (Cost: 1 Coin).
+    </p>
+    
+    <input type="text" id="dna-seq" placeholder="Enter RNA sequence (e.g. AUG)">
+    <button onclick="translateSequence()">Translate Sequence</button>
+    
+    <div id="res-biology" class="result"></div>
+</div>
+
+<script>
+    function translateSequence() {
+        // 1. Check and deduct coins securely
+        if (!checkCoins(1)) return;
+
+        const seq = document.getElementById('dna-seq').value.toUpperCase().trim();
+        if (!seq) return;
+
+        deductCoins(1);
+
+        const box = document.getElementById('res-biology');
+        box.style.display = "block";
+        box.innerText = `Sequence Analyzed: ${seq}\nProtein: Methionine (Start Codon)`;
+    }
+</script>

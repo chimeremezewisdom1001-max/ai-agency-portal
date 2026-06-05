@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Label & Grid Optimizer</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        input, select { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        #print-preview { display: none; margin-top: 15px; text-align: center; }
+        #print-preview img { max-width: 100%; border: 1px solid #ddd; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">HARDWARE REPLACEMENT</span>
+            <h3>PDF Shipping Label Grid Optimizer</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Cost: <b>2 Coins</b>. Rearranges, shrinks, or grids standard shipping labels to print cleanly on cheap A4 paper.</p>
+            
+            <input type="file" id="label-upload" accept="image/*">
+            <select id="grid-layout">
+                <option value="1">1 Label per A4 Sheet (Standard)</option>
+                <option value="2">2 Labels per A4 Sheet (Side-by-Side)</option>
+                <option value="4">4 Labels per A4 Sheet (Grid Quad)</option>
+            </select>
+            <button onclick="optimizeLabel()">Generate Grid PDF</button>
+
+            <div id="print-preview">
+                <h4 style="margin: 10px 0;">Optimized Preview:</h4>
+                <img id="preview-img" src="" alt="Preview">
+                <button onclick="window.print()" style="background:#28a745; margin-top:10px;">Send to Ordinary Printer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        function optimizeLabel() {
+            if (coins < 2) {
+                alert("Need 2 Coins! Redirecting to EasyPay to buy coins.");
+                window.location.href = "tools-easypay.html";
+                return;
+            }
+
+            const upload = document.getElementById('label-upload').files[0];
+            if (!upload) { alert("Please upload a shipping label image first."); return; }
+
+            // Deduct Coins
+            coins -= 2;
+            localStorage.setItem('user_coins', coins);
+            document.getElementById('coin-balance').innerText = coins;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('print-preview').style.display = "block";
+                document.getElementById('preview-img').src = e.target.result;
+            };
+            reader.readAsDataURL(upload);
+        }
+    </script>
+</body>
+              </html>

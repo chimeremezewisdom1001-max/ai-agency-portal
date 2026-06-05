@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Spaced Repetition Flashcards</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        input { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .flashcard { background: #e7f3ff; border: 1px solid #1877f2; padding: 15px; border-radius: 8px; text-align: center; margin-top: 15px; display: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">HARDWARE REPLACEMENT</span>
+            <h3>Programmatic Memory Flashcards</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Cost: <b>1 Coin</b>. Replaces pre-made study index cards with customized spaced-repetition schedules.</p>
+            
+            <input type="text" id="card-q" placeholder="Enter Question / Concept">
+            <input type="text" id="card-a" placeholder="Enter Answer">
+            <button onclick="createSRSFlashcard()">Create Flashcard</button>
+
+            <div id="flashcard-box" class="flashcard" onclick="flipCard()">
+                <strong id="card-text" style="font-size:16px;">TAP TO VIEW QUESTION</strong>
+                <p id="card-desc" style="font-size:12px; color:#555; margin-top:5px;"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        let q = "", a = "", isFlipped = false;
+
+        function createSRSFlashcard() {
+            if (coins < 1) {
+                alert("Need 1 Coin! Redirecting to EasyPay to buy coins.");
+                window.location.href = "tools-easypay.html";
+                return;
+            }
+
+            const qIn = document.getElementById('card-q').value.trim();
+            const aIn = document.getElementById('card-a').value.trim();
+
+            if (!qIn || !aIn) { alert("Please input both fields."); return; }
+
+            // Deduct Coins
+            coins -= 1;
+            localStorage.setItem('user_coins', coins);
+            document.getElementById('coin-balance').innerText = coins;
+
+            q = qIn; a = aIn; isFlipped = false;
+            document.getElementById('flashcard-box').style.display = "block";
+            document.getElementById('card-text').innerText = "Question:";
+            document.getElementById('card-desc').innerText = q;
+
+            document.getElementById('card-q').value = "";
+            document.getElementById('card-a').value = "";
+        }
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                document.getElementById('card-text').innerText = "Answer:";
+                document.getElementById('card-desc').innerText = a;
+            } else {
+                document.getElementById('card-text').innerText = "Question:";
+                document.getElementById('card-desc').innerText = q;
+            }
+        }
+    </script>
+</body>
+                                                </html>

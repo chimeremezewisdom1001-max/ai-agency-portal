@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web OBD2 Vehicle Diagnostics</title>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 12px; text-align: left; display: none; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">HARDWARE REPLACEMENT</span>
+            <h3>Mechanics Handheld OBD2 Scanner</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Cost: <b>2 Coins</b>. Simulates car diagnostic telemetry readouts and clears check engine trouble codes.</p>
+            
+            <button onclick="scanVehicleDiagnostics()">Scan Car Telemetry</button>
+            <div id="res-obd" class="result"></div>
+            <button id="clear-obd-btn" style="background:red; margin-top:10px; display:none;" onclick="clearEngineLight()">Clear Check Engine Light</button>
+        </div>
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        function scanVehicleDiagnostics() {
+            if (coins < 2) {
+                alert("Need 2 Coins! Redirecting to EasyPay to buy coins.");
+                window.location.href = "tools-easypay.html";
+                return;
+            }
+
+            // Deduct Coins
+            coins -= 2;
+            localStorage.setItem('user_coins', coins);
+            document.getElementById('coin-balance').innerText = coins;
+
+            const box = document.getElementById('res-obd'); box.style.display = "block";
+            document.getElementById('clear-obd-btn').style.display = "block";
+
+            box.innerHTML = `--- OBD2 DIAGNOSTICS DETECTED ---
+ECU Status: Online
+Trouble Code: <b>P0300 (Random/Multiple Cylinder Misfire)</b>
+Diagnostic Description: Ignition failure detected in powertrain combustion chambers.
+O2 Sensor: 0.45V (Within tolerance)
+Status: Check Engine Light ACTIVE`;
+        }
+
+        function clearEngineLight() {
+            alert("Clearing system codes... Troubleshooting light cleared!");
+            const box = document.getElementById('res-obd');
+            box.innerHTML = `--- OBD2 DIAGNOSTICS DETECTED ---
+ECU Status: Online
+Trouble Code: <b>None (Codes Cleared)</b>
+Diagnostic Description: All engine parameters operating normally.
+Status: Systems Clear`;
+            document.getElementById('clear-obd-btn').style.display = "none";
+        }
+    </script>
+</body>
+              </html>

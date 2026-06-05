@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Compressor & PDF Converter</title>
+    <!-- Async load secure PDF and ZIP compression engines -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root { --primary: #1877f2; --bg: #f0f2f5; --card: #ffffff; --text: #050505; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .header { background: var(--card); width: 100%; max-width: 410px; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; text-align: left; }
+        .wallet-badge { position: absolute; top: 20px; right: 20px; background: #e7f3ff; color: var(--primary); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: left; }
+        input, select, textarea { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; }
+        .result { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 10px; font-family: monospace; font-size: 12px; text-align: left; display: none; white-space: pre-wrap; word-break: break-all; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button onclick="window.location.href='index.html'" style="width: auto; padding: 5px 10px; margin: 0; background: #65676b;">← Back</button>
+        <div class="wallet-badge">🪙 <span id="coin-balance">0</span> Coins</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Tool 1: Universal ZIP Compressor (Handles ANY File) -->
+        <div class="card" style="border-left: 5px solid #28a745;">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">UNIVERSAL COMPRESSOR</span>
+            <h3>Universal ZIP File Compressor</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Cost: <b>1 Coin</b>. Upload <b>any file type</b> (PDF, DOCX, Video, Image) to compress and package it into a downloadable `.zip` archive.</p>
+            
+            <input type="file" id="zip-upload" multiple>
+            <button onclick="compressToZIP()">Compress to ZIP</button>
+            <div id="res-zip" class="result"></div>
+            <a id="zip-download-link" style="display:none; text-decoration:none;">
+                <button style="background:#28a745; margin-top:10px;">💾 Download Compressed ZIP</button>
+            </a>
+        </div>
+
+        <!-- Tool 2: Image Quality Compressor -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">IMAGE OPTIMIZER</span>
+            <h3>Image Size & Quality Compressor</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Cost: <b>1 Coin</b>. Reduces picture MB sizes up to 5MB, adjusting resolution for fast loading.</p>
+            
+            <input type="file" id="comp-upload" accept="image/*">
+            <label style="font-size: 11px; display:block; margin-bottom:5px;">Quality Level: <span id="comp-pct">50</span>%</label>
+            <input type="range" id="comp-quality" min="10" max="90" value="50" style="width:95%;" oninput="document.getElementById('comp-pct').innerText = this.value">
+            
+            <button onclick="compressImage()" style="margin-top:10px;">Compress Image</button>
+            <div id="res-compress" class="result"></div>
+            <a id="download-link" style="display:none; text-decoration:none;" download="compressed_image.jpg">
+                <button style="background:#28a745; margin-top:10px;">💾 Download Compressed Image</button>
+            </a>
+        </div>
+
+        <!-- Tool 3: Document to PDF Converter -->
+        <div class="card">
+            <span style="color: blue; font-size: 10px; font-weight: bold;">DOCUMENT CONVERTER</span>
+            <h3>Raw Text to PDF Document Converter</h3>
+            <p style="font-size:12px; color:#666; margin-top:-5px;">Cost: <b>1 Coin</b>. Converts any raw text, notes, or code blocks into a formatted PDF document.</p>
+            
+            <textarea id="conv-input" rows="4" placeholder="Type or paste your text here..."></textarea>
+            <button onclick="convertTextToPDF()" style="background:#1877f2;">Convert & Export PDF</button>
+            <div id="res-conv" class="result"></div>
+            <a id="conv-download-link" style="display:none; text-decoration:none;">
+                <button style="background:#28a745; margin-top:10px;">💾 Download Converted PDF</button>
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
+        document.getElementById('coin-balance').innerText = coins;
+
+        async function loadGlobalConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+                let adScript = document.createElement('script'); adScript.src = config.adsterra_script_url; document.body.appendChild(adScript);
+            } catch (e) { console.log("Config failed."); }
+        }
+        window.addEventListener('load', loadGlobalConfig);
+
+        function checkAndDeduct(cost) {
+            if (coins < cost) {
+                alert("Need " + cost + " Coins! Redirecting to EasyPay to buy coins.");
+                window.location.href = "tools-easypay.html";
+                return false;
+            }
+            coins -= cost;
+            localStorage.setItem('user_coins', coins);
+            document.getElementById('coin-balance').innerText = coins;
+            return true;
+        }
+
+        // 1. Universal ZIP Compressor (Handles ANY File)
+        async function compressToZIP() {
+            const files = document.getElementById('zip-upload').files;
+            if (files.length === 0) { alert("Please select at least one file to compress."); return; }
+            if (!checkAndDeduct(1)) return;
+
+            const zip = new JSZip();
+            const box = document.getElementById('res-zip'); box.style.display = "block";
+            logZipDetails("Compressing files into secure ZIP container...");
+
+            for (let i = 0; i < files.length; i++) {
+                zip.file(files[i].name, files[i]);
+            }
+
+            try {
+                const content = await zip.generateAsync({ type: "blob" });
+                const blobUrl = URL.createObjectURL(content);
+
+                box.innerText = `Successfully compressed ${files.length} file(s) into ZIP!\nZIP Package Size: ${(content.size / 1024).toFixed(1)} KB`;
+                
+                const dlLink = document.getElementById('zip-download-link');
+                dlLink.style.display = "block";
+                dlLink.href = blobUrl;
+                dlLink.download = "compressed_archive.zip";
+            } catch (err) {
+                alert("Compression failed: " + err.message);
+            }
+        }
+        function logZipDetails(msg) { document.getElementById('res-zip').innerText = msg; }
+
+        // 2. Image Quality Compressor (Max 5MB)
+        function compressImage() {
+            const file = document.getElementById('comp-upload').files[0];
+            if (!file) { alert("Please select an image file first."); return; }
+            if (file.size > 5 * 1024 * 1024) { alert("Error: File exceeds the maximum 5MB size limit."); return; }
+            if (!checkAndDeduct(1)) return;
+
+            const quality = parseFloat(document.getElementById('comp-quality').value) / 100;
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    
+                    // Convert to raw Blob for mobile Chrome compatibility
+                    const arr = compressedDataUrl.split(','), mime = arr[0].match(/:(.*?);/)[1], bstr = atob(arr[1]);
+                    let n = bstr.length; const u8arr = new Uint8Array(n);
+                    while (n--) { u8arr[n] = bstr.charCodeAt(n); }
+                    const blob = new Blob([u8arr], { type: mime });
+                    const blobUrl = URL.createObjectURL(blob);
+
+                    const originalSizeKB = (file.size / 1024).toFixed(1);
+                    const approxCompressedSizeKB = (blob.size / 1024).toFixed(1);
+
+                    const box = document.getElementById('res-compress'); box.style.display = "block";
+                    box.innerText = `Original Size: ${originalSizeKB} KB\nCompressed Size: ${approxCompressedSizeKB} KB\nReduction Ratio: ${(((originalSizeKB - approxCompressedSizeKB) / originalSizeKB) * 100).toFixed(0)}%`;
+
+                    const dlLink = document.getElementById('download-link');
+                    dlLink.style.display = "block";
+                    dlLink.href = blobUrl;
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 3. Document to PDF Converter
+        function convertTextToPDF() {
+            const input = document.getElementById('conv-input').value.trim();
+            const box = document.getElementById('res-conv');
+            const dlLink = document.getElementById('conv-download-link');
+            
+            if (!input) { alert("Please enter input text/data first."); return; }
+            if (!checkAndDeduct(1)) return;
+            box.style.display = "block";
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const splitText = doc.splitTextToSize(input, 180);
+            doc.text(splitText, 10, 10);
+            
+            const pdfBlob = doc.output('blob');
+            const blobUrl = URL.createObjectURL(pdfBlob);
+
+            box.innerText = "Success: Text converted to PDF. Tap the button below to download the file directly.";
+            dlLink.style.display = "block";
+            dlLink.href = blobUrl;
+            dlLink.download = "converted_document.pdf";
+        }
+    </script>
+</body>
+          </html>

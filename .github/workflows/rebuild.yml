@@ -1,0 +1,30 @@
+name: Auto Compile Static Template Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+
+      - name: Run Code Stitcher
+        run: node scripts/rebuild.js
+
+      - name: Commit and Push Compiled Releases
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add *.html
+          git diff-index --quiet HEAD || git commit -m "Auto-compiled template releases [skip ci]"
+          git push origin main

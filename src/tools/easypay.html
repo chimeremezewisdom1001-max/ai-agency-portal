@@ -1,0 +1,55 @@
+<!-- TITLE: EasyPay Portal - Simple Billing -->
+<div class="card" style="border-left: 5px solid #28a745;">
+    <h2>EasyPay Portal</h2>
+    <p style="font-size: 13px; color: #65676b; margin-top: -10px;">
+        Follow these steps to complete your checkout and claim your utility coins.
+    </p>
+</div>
+
+<div class="card">
+    <h3>🇳🇬 1. Pay via OPay Transfer</h3>
+    <div style="background: #fafafa; padding: 10px; border-radius: 6px; border: 1px solid #ddd; line-height: 1.6;">
+        - Bank Name: <b>OPay</b><br>
+        - Account Number: <b>8152039407</b><br>
+        - Account Name: <b>Chimeremeze wisdom nwachukwu</b>
+    </div>
+</div>
+
+<div class="card" style="border: 2px solid var(--primary);">
+    <h3>✍️ Submit Your Payment Receipt</h3>
+    <p style="font-size:12px; color:#666; margin-top:-5px;">Once you have transferred the money, fill out this form to submit your claim ticket.</p>
+    
+    <input type="text" id="claim-name" placeholder="Your Full Name">
+    <input type="text" id="claim-val" placeholder="Amount Sent (e.g. ₦1,500)">
+    <textarea id="claim-ref" placeholder="Enter transaction reference ID..."></textarea>
+    
+    <button onclick="submitEasyPayClaim()">I Have Sent the Money</button>
+</div>
+
+<script>
+    async function submitEasyPayClaim() {
+        const name = document.getElementById('claim-name').value.trim();
+        const value = document.getElementById('claim-val').value.trim();
+        const details = document.getElementById('claim-ref').value.trim();
+
+        if (!name || !value || !details) {
+            alert("Please fill in your name, payment value, and reference first.");
+            return;
+        }
+
+        try {
+            const { error } = await window.db.from('payments_claims').insert([
+                { sender_name: name, payment_method: 'EasyPay: Manual Transfer', amount_value: value, details_or_code: details }
+            ]);
+
+            if (error) throw error;
+
+            alert("🎉 Payment Claim Logged! Redirecting to WhatsApp for manual verification.");
+            const waMessage = `Hello Chimeremeze! I just made an OPay transfer.\n\nName: ${name}\nValue: ${value}\nReference: ${details}`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(waMessage)}`, '_blank');
+
+        } catch (e) {
+            alert("Database submission failed. Redirecting to WhatsApp manually.");
+        }
+    }
+  </script>
